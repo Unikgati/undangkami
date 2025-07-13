@@ -78,6 +78,7 @@ const TemplateCard = ({ template }) => {
 };
 
 const Homepage = () => {
+	const [showMobileNav, setShowMobileNav] = useState(false);
 	return (
 		<>
 			<Helmet>
@@ -86,37 +87,81 @@ const Homepage = () => {
 					name="description"
 					content="Pilih dari berbagai template undangan digital yang indah. Buat dan bagikan undangan pernikahan Anda dengan mudah."
 				/>
+				<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
 			</Helmet>
 			<div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 to-purple-900 text-white">
 				{/* Header */}
-				<header className="w-full px-8 py-6 flex items-center justify-between rounded-b-3xl">
+				<header className="w-full px-8 py-6 flex items-center justify-between rounded-b-3xl relative">
 					<div className="flex items-center gap-3">
 						<img
 							src="/logo192.png"
 							alt="Logo"
-							className="h-10 w-10 rounded-full border border-purple-400"
+							className="h-10 w-10 rounded-full"
 						/>
 					</div>
+					{/* Desktop Nav */}
 					<nav className="hidden md:flex gap-8 text-lg">
 						<a
 							href="/"
-							className="hover:text-yellow-300 transition font-semibold font-[600]"
+							className="hover:text-yellow-300 transition font-[Plus Jakarta Sans] font-light font-[500]"
 						>
 							Home
 						</a>
 						<a
 							href="#templates"
-							className="hover:text-yellow-300 transition font-semibold font-[600]"
+							className="hover:text-yellow-300 transition font-[Plus Jakarta Sans] font-light font-[500]"
 						>
 							Template
 						</a>
 						<a
 							href="/login"
-							className="hover:text-yellow-300 transition font-semibold font-[600]"
+							className="hover:text-yellow-300 transition font-[Plus Jakarta Sans] font-light font-[500]"
 						>
 							Login
 						</a>
 					</nav>
+					{/* Hamburger Button (Mobile) */}
+					<button
+						className="md:hidden text-white focus:outline-none"
+						onClick={() => setShowMobileNav((prev) => !prev)}
+						aria-label="Toggle navigation"
+					>
+						<svg width="32" height="32" fill="none" viewBox="0 0 24 24">
+							<path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+						</svg>
+					</button>
+					{/* Mobile Nav */}
+					{showMobileNav && (
+						<motion.div
+							initial={{ y: 300, opacity: 0 }}
+							animate={{ y: 0, opacity: 1 }}
+							exit={{ y: 300, opacity: 0 }}
+							transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+							className="fixed left-0 bottom-0 w-full bg-gradient-to-t from-purple-900/95 to-purple-800/90 z-50 flex flex-col items-center gap-6 py-10 shadow-2xl rounded-t-3xl"
+						>
+							<a
+								href="/"
+								className="text-lg font-[Plus Jakarta Sans] font-light font-[500] hover:text-yellow-300 transition"
+								onClick={() => setShowMobileNav(false)}
+							>
+								Home
+							</a>
+							<a
+								href="#templates"
+								className="text-lg font-[Plus Jakarta Sans] font-light font-[500] hover:text-yellow-300 transition"
+								onClick={() => setShowMobileNav(false)}
+							>
+								Template
+							</a>
+							<a
+								href="/login"
+								className="text-lg font-[Plus Jakarta Sans] font-light font-[500] hover:text-yellow-300 transition"
+								onClick={() => setShowMobileNav(false)}
+							>
+								Login
+							</a>
+						</motion.div>
+					)}
 				</header>
 
 				{/* Hero Section */}
@@ -135,10 +180,11 @@ const Homepage = () => {
 								/>
 							</span>
 						</h1>
-						<p className="text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto mb-8 font-sans">
-							Buat undangan pernikahan digital dengan template premium,
-							mudah, dan interaktif. Coba, preview, dan bagikan momen
-							spesial Anda!
+<p className="text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto mb-2 font-[Plus Jakarta Sans]">
+							Pilih templatenya, cobain secara gratis, kalau cocok baru deh bayar!
+						</p>
+<p className="text-lg md:text-2ml text-gray-200 max-w-2xl mx-auto mb-8 font-[Plus Jakarta Sans]">
+							#nggkcocoknggkbayar
 						</p>
 						<a
 							href="#templates"
@@ -248,25 +294,25 @@ const Homepage = () => {
 							</p>
 						</div>
 						<div className="flex gap-4">
-							<a
-								href="https://instagram.com"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="hover:text-yellow-300 transition"
+<a
+	href="https://instagram.com"
+	target="_blank"
+	rel="noopener noreferrer"
+	className="hover:text-yellow-300 transition font-[Plus Jakarta Sans] font-light font-[300]"
 							>
 								Instagram
 							</a>
-							<a
-								href="mailto:info@undangan.digital"
-								className="hover:text-yellow-300 transition"
+<a
+	href="mailto:info@undangan.digital"
+	className="hover:text-yellow-300 transition font-[Plus Jakarta Sans] font-light font-[300]"
 							>
 								Email
 							</a>
-							<a
-								href="https://wa.me/628123456789"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="hover:text-yellow-300 transition"
+<a
+	href="https://wa.me/628123456789"
+	target="_blank"
+	rel="noopener noreferrer"
+	className="hover:text-yellow-300 transition font-[Plus Jakarta Sans] font-light font-[300]"
 							>
 								WhatsApp
 							</a>
