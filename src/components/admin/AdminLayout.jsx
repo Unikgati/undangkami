@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, FileText, Music, CreditCard, Users, Settings, LogOut, Home } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { db } from '@/lib/firebase';
+import { doc } from 'firebase/firestore';
 
 const adminMenuItems = [
     { title: 'Overview', icon: <LayoutDashboard/>, path: '/admin' },
@@ -17,6 +19,21 @@ const adminMenuItems = [
 
 const AdminLayout = ({ children }) => {
     const { toast } = useToast();
+    const [logoUrl, setLogoUrl] = useState(null);
+
+    useEffect(() => {
+        import('firebase/firestore').then(({ onSnapshot }) => {
+            const docRef = doc(db, 'settings', 'webapp');
+            const unsubscribe = onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    setLogoUrl(docSnap.data().logoUrl);
+                } else {
+                    setLogoUrl(null);
+                }
+            });
+            return unsubscribe;
+        });
+    }, []);
 
     const handleLogout = () => {
         toast({
@@ -39,7 +56,11 @@ const AdminLayout = ({ children }) => {
                     className="w-64 p-4 flex flex-col glass-effect-sidebar border-r border-white/10"
                 >
                     <div className="flex items-center gap-3 mb-10">
-                        <img src="/logo192.png" alt="Logo" className="h-10 w-10 rounded-full border border-purple-400" />
+                        {logoUrl ? (
+                            <img src={logoUrl} alt="Logo" className="max-h-12 max-w-32 object-contain" style={{ height: 'auto', width: 'auto', display: 'block' }} />
+                        ) : (
+                            <img src="/logo192.png" alt="Logo" className="h-10 w-10 rounded-full border border-purple-400" />
+                        )}
                     </div>
                     <nav className="flex-grow">
                         <ul>

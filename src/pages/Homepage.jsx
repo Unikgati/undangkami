@@ -161,19 +161,19 @@ const Homepage = () => {
 					<nav className="hidden md:flex gap-8 text-lg">
 						<a
 							href="/"
-							className="hover:text-yellow-300 transition font-[Plus Jakarta Sans] font-light font-[500]"
+							className="hover:text-yellow-300 transition font-[Plus Jakarta Sans] font-light font-[600]"
 						>
 							Home
 						</a>
 						<a
 							href="#templates"
-							className="hover:text-yellow-300 transition font-[Plus Jakarta Sans] font-light font-[500]"
+							className="hover:text-yellow-300 transition font-[Plus Jakarta Sans] font-light font-[600]"
 						>
 							Template
 						</a>
 						<a
 							href="/login"
-							className="hover:text-yellow-300 transition font-[Plus Jakarta Sans] font-light font-[500]"
+							className="hover:text-yellow-300 transition font-[Plus Jakarta Sans] font-light font-[600]"
 						>
 							Login
 						</a>
@@ -206,21 +206,21 @@ const Homepage = () => {
 							<div className="relative z-50 w-full flex flex-col items-center gap-6">
 								<a
 									href="/"
-									className="text-lg font-[Plus Jakarta Sans] font-light font-[500] hover:text-yellow-300 transition"
+									className="text-lg font-[Plus Jakarta Sans] font-light font-[600] hover:text-yellow-300 transition"
 									onClick={() => setShowMobileNav(false)}
 								>
 									Home
 								</a>
 								<a
 									href="#templates"
-									className="text-lg font-[Plus Jakarta Sans] font-light font-[500] hover:text-yellow-300 transition"
+									className="text-lg font-[Plus Jakarta Sans] font-light font-[600] hover:text-yellow-300 transition"
 									onClick={() => setShowMobileNav(false)}
 								>
 									Template
 								</a>
 								<a
 									href="/login"
-									className="text-lg font-[Plus Jakarta Sans] font-light font-[500] hover:text-yellow-300 transition"
+									className="text-lg font-[Plus Jakarta Sans] font-light font-[600] hover:text-yellow-300 transition"
 									onClick={() => setShowMobileNav(false)}
 								>
 									Login
