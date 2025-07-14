@@ -135,7 +135,7 @@ const Homepage = () => {
 							<img
 								src={logoUrl}
 								alt="Logo"
-								className="max-h-12 max-w-32 object-contain bg-white rounded"
+								className="max-h-12 max-w-32 object-contain"
 								style={{ height: 'auto', width: 'auto', display: 'block' }}
 							/>
 						)}
