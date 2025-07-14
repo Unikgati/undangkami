@@ -84,18 +84,20 @@ const Homepage = () => {
 	const [logoUrl, setLogoUrl] = useState(null);
 
 	useEffect(() => {
-		const fetchLogo = async () => {
-			try {
-				const docRef = doc(db, "webSettings", "logoUrl");
-				const docSnap = await getDoc(docRef);
+		// Real-time listener agar logo langsung update jika berubah di Firestore
+		const docRef = doc(db, "webSettings", "logoUrl");
+		const unsubscribe = import("firebase/firestore").then(({ onSnapshot }) => {
+			return onSnapshot(docRef, (docSnap) => {
 				if (docSnap.exists()) {
 					setLogoUrl(docSnap.data().url);
+				} else {
+					setLogoUrl(null);
 				}
-			} catch (err) {
-				// fallback: do nothing, will use default logo
-			}
+			});
+		});
+		return () => {
+			unsubscribe.then(u => u && u());
 		};
-		fetchLogo();
 	}, []);
 
 	return (
