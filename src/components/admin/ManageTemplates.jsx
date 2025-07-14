@@ -4,15 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { PlusCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const ManageTemplates = () => {
+    const navigate = useNavigate();
     const { toast } = useToast();
 
     const handleAction = (action) => {
-        toast({
-            title: "🚧 Fitur Belum Tersedia",
-            description: `Fitur "${action}" belum diimplementasikan. 🚀`,
-        });
+        if (action === 'Buat Template Baru') {
+            navigate('/admin/templates/builder');
+        } else {
+            toast({
+                title: "🚧 Fitur Belum Tersedia",
+                description: `Fitur "${action}" belum diimplementasikan. 🚀`,
+            });
+        }
     };
 
     return (

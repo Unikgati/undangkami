@@ -8,6 +8,7 @@ import ManageOrders from '@/components/admin/ManageOrders';
 import ManagePayments from '@/components/admin/ManagePayments';
 import ManageUsers from '@/components/admin/ManageUsers';
 import WebAppSettings from '@/components/admin/WebAppSettings';
+import TemplateBuilder from '@/components/admin/TemplateBuilder';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ const AdminDashboard = () => {
       <Routes>
         <Route path="/" element={<AdminOverview />} />
         <Route path="templates" element={<ManageTemplates />} />
+        <Route path="templates/builder" element={<TemplateBuilder />} />
         <Route path="music" element={<ManageMusic />} />
         <Route path="orders" element={<ManageOrders />} />
         <Route path="payments" element={<ManagePayments />} />
