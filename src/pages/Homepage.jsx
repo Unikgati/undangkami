@@ -197,27 +197,35 @@ const Homepage = () => {
 					transition={{ type: 'tween', duration: 0.35, ease: 'easeOut' }}
 							className="fixed left-0 bottom-0 w-full bg-gradient-to-t from-purple-900/100 to-purple-800/100 z-50 flex flex-col items-center gap-6 py-10 rounded-t-3xl"
 						>
-							<a
-								href="/"
-								className="text-lg font-[Plus Jakarta Sans] font-light font-[500] hover:text-yellow-300 transition"
+							{/* Overlay to close menu on outside touch */}
+							<div
+								className="fixed inset-0 z-40"
 								onClick={() => setShowMobileNav(false)}
-							>
-								Home
-							</a>
-							<a
-								href="#templates"
-								className="text-lg font-[Plus Jakarta Sans] font-light font-[500] hover:text-yellow-300 transition"
-								onClick={() => setShowMobileNav(false)}
-							>
-								Template
-							</a>
-							<a
-								href="/login"
-								className="text-lg font-[Plus Jakarta Sans] font-light font-[500] hover:text-yellow-300 transition"
-								onClick={() => setShowMobileNav(false)}
-							>
-								Login
-							</a>
+								style={{ touchAction: 'manipulation' }}
+							/>
+							<div className="relative z-50 w-full flex flex-col items-center gap-6">
+								<a
+									href="/"
+									className="text-lg font-[Plus Jakarta Sans] font-light font-[500] hover:text-yellow-300 transition"
+									onClick={() => setShowMobileNav(false)}
+								>
+									Home
+								</a>
+								<a
+									href="#templates"
+									className="text-lg font-[Plus Jakarta Sans] font-light font-[500] hover:text-yellow-300 transition"
+									onClick={() => setShowMobileNav(false)}
+								>
+									Template
+								</a>
+								<a
+									href="/login"
+									className="text-lg font-[Plus Jakarta Sans] font-light font-[500] hover:text-yellow-300 transition"
+									onClick={() => setShowMobileNav(false)}
+								>
+									Login
+								</a>
+							</div>
 						</motion.div>
 					)}
 				</header>
