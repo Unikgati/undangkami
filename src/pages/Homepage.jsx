@@ -131,11 +131,13 @@ const Homepage = () => {
 				{/* Header */}
 				<header className="w-full px-8 py-6 flex items-center justify-between rounded-b-3xl relative">
 					<div className="flex items-center gap-3">
-						<img
-							src={logoUrl || "https://uxwing.com/wp-content/themes/uxwing/download/clothes-and-accessories/diamond-ring-icon.png"}
-							alt="Logo"
-							className="h-10 w-10"
-						/>
+						{logoUrl && (
+							<img
+								src={logoUrl}
+								alt="Logo"
+								className="h-10 w-10"
+							/>
+						)}
 					</div>
 					{/* Desktop Nav */}
 					<nav className="hidden md:flex gap-8 text-lg">
