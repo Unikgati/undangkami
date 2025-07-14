@@ -85,11 +85,11 @@ const Homepage = () => {
 
 	useEffect(() => {
 		// Real-time listener agar logo langsung update jika berubah di Firestore
-		const docRef = doc(db, "webSettings", "logoUrl");
+		const docRef = doc(db, "settings", "webapp");
 		const unsubscribe = import("firebase/firestore").then(({ onSnapshot }) => {
 			return onSnapshot(docRef, (docSnap) => {
 				if (docSnap.exists()) {
-					setLogoUrl(docSnap.data().url);
+					setLogoUrl(docSnap.data().logoUrl);
 				} else {
 					setLogoUrl(null);
 				}
