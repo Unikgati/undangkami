@@ -12,66 +12,67 @@ const templates = [
 		id: 1,
 		name: 'Elegan Klasik',
 		image: 'classic-elegance-template',
-		description: 'Desain timeless dengan sentuhan modern.',
 	},
 	{
 		id: 2,
 		name: 'Modern Minimalis',
 		image: 'modern-minimalist-template',
-		description: 'Bersih, simpel, dan fokus pada detail.',
 	},
 	{
 		id: 3,
 		name: 'Rustik Romantis',
 		image: 'rustic-romance-template',
-		description: 'Nuansa alam yang hangat dan mempesona.',
 	},
 	{
 		id: 4,
 		name: 'Bunga Tropis',
 		image: 'tropical-bloom-template',
-		description: 'Ceria dan penuh warna seperti di surga tropis.',
 	},
 ];
 
 const TemplateCard = ({ template }) => {
 	const handlePreview = (e) => {
 		e.preventDefault();
-		// ...toast logic...
+		// Logika preview atau toast
 	};
+
+	const price = 120000;
+	const discount = 20;
+	const finalPrice = price * (1 - discount / 100);
+
 	return (
-		<motion.div
-			whileHover={{ y: -10, scale: 1.05 }}
-			transition={{ type: 'spring', stiffness: 300 }}
-		>
-			<Card className="overflow-hidden glass-effect border-none shadow-2xl">
-				<CardContent className="p-0">
+		<motion.div whileHover={{ y: -10, scale: 1.03 }} transition={{ type: 'spring', stiffness: 300 }}>
+			<Card className="overflow-hidden border border-purple-200 bg-white text-gray-800 rounded-2xl shadow-lg">
+				<div className="relative">
 					<img
 						alt={template.name}
 						className="w-full h-64 object-cover"
 						src="https://images.unsplash.com/photo-1595872018818-97555653a011"
 					/>
-					<div className="p-6">
-						<h3 className="text-xl font-playfair font-bold text-white">
-							{template.name}
-						</h3>
-						<p className="text-gray-300 mt-2 text-sm">
-							{template.description}
-						</p>
-						<div className="flex justify-between mt-6">
-							<Button
-								variant="outline"
-								className="bg-transparent text-white border-white hover:bg-white hover:text-black transition-colors"
-								onClick={handlePreview}
-							>
-								Preview
-							</Button>
-							<Link to={`/order/${template.id}`}>
-								<Button className="bg-white text-black hover:bg-gray-200 pulse-glow">
-									Coba Sekarang
-								</Button>
-							</Link>
-						</div>
+					<span className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs bg-purple-100 text-purple-700 font-semibold border border-purple-200">
+						Islamic
+					</span>
+				</div>
+				<CardContent className="p-6">
+					<h3 className="text-xl font-semibold mb-4">{template.name}</h3>
+					<div className="mb-4">
+						<span className="text-gray-400 line-through mr-2 text-sm">Rp{price.toLocaleString('id-ID')}</span>
+						<span className="text-purple-700 font-bold text-lg">Rp{finalPrice.toLocaleString('id-ID')}</span>
+						<span className="ml-2 text-xs text-green-600 font-semibold">-{discount}%</span>
+					</div>
+					<div className="flex justify-between gap-2">
+						<Button
+							variant="outline"
+							className="flex-1 bg-white border border-purple-700 text-purple-700 hover:bg-purple-700 hover:border-purple-800"
+							onClick={handlePreview}
+						>
+							Preview
+						</Button>
+<Link to={`/order/${template.id}`} className="flex-1">
+	<Button className="w-full bg-purple-700 text-white hover:bg-purple-800 hover:shadow-lg">
+		Cobain
+	</Button>
+</Link>
 					</div>
 				</CardContent>
 			</Card>
@@ -110,21 +111,37 @@ const Homepage = () => {
 				/>
 				<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
 				{/* Animasi stabilo untuk highlight */}
-				<style>{`
-	.animated-highlight {
-	  background: linear-gradient(90deg, #ffe066 60%, #fff 100%);
-	  background-size: 200% 100%;
-	  background-position: -100% 0;
-	  padding: 0.2em 0.4em;
-	  border-radius: 0.3em;
-	  color: #222;
-	  font-weight: bold;
-	  animation: highlightMove 2s infinite alternate;
-	}
-	@keyframes highlightMove {
-	  0% { background-position: -100% 0; }
-	  100% { background-position: 0 0; }
-	}
+				  <style>{`
+.animated-highlight {
+  position: relative;
+  display: inline-block;
+  z-index: 0;
+  color: #222;
+  font-weight: bold;
+  padding: 0.2em 0.4em; /* 🟡 padding atas-bawah dan kiri-kanan */
+  border-radius: 0.3em;
+}
+
+.animated-highlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #ffe066;
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: highlightOnce 1.2s ease-out forwards;
+  border-radius: 0.25em;
+}
+
+@keyframes highlightOnce {
+  to {
+	transform: scaleX(1);
+  }
+}
   `}</style>
 			</Helmet>
 			<div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 to-purple-900 text-white">
@@ -178,7 +195,7 @@ const Homepage = () => {
 					animate={{ y: 0 }}
 					exit={{ y: 300 }}
 					transition={{ type: 'tween', duration: 0.35, ease: 'easeOut' }}
-							className="fixed left-0 bottom-0 w-full bg-gradient-to-t from-purple-900/100 to-purple-800/100 z-50 flex flex-col items-center gap-6 py-10 shadow-2xl rounded-t-3xl"
+							className="fixed left-0 bottom-0 w-full bg-gradient-to-t from-purple-900/100 to-purple-800/100 z-50 flex flex-col items-center gap-6 py-10 rounded-t-3xl"
 						>
 							<a
 								href="/"
@@ -224,21 +241,26 @@ const Homepage = () => {
 <p className="text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto mb-4 font-[Plus Jakarta Sans]">
 							Pilih templatenya, cobain langsung secara gratis!
 						</p>
-<p className="text-lg md:text-2ml text-gray-200 max-w-2xl mx-auto mb-8 font-[Plus Jakarta Sans]">
-  <span className="animated-highlight">Kalau nggk cocok, nggk usah bayar.</span>
+<p className="text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto mb-8 font-[Plus Jakarta Sans]">
+  <span className="animated-highlight">
+	Kalau nggk cocok, nggk usah bayar.
+  </span>
 </p>
 						<a
-							href="#templates"
-							className="inline-block px-4 py-2 rounded-full border-2 border-white text-white font-semibold text-lg hover:text-purple-700 hover:bg-gray-100 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-300"
-							onClick={(e) => {
-								e.preventDefault();
-								const el = document.getElementById('templates');
-								if (el) {
-									el.scrollIntoView({ behavior: 'smooth' });
-								}
-							}}
+						href="#templates"
+						className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-white font-semibold text-lg hover:text-purple-700 hover:bg-gray-100 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-300"
+						onClick={(e) => {
+							e.preventDefault();
+							const el = document.getElementById('templates');
+							if (el) {
+							el.scrollIntoView({ behavior: 'smooth' });
+							}
+						}}
 						>
-							Lihat Template
+						Lihat Template
+						<span className="transform transition-transform duration-300 group-hover:translate-x-1">
+							➜
+						</span>
 						</a>
 					</motion.div>
 					{/* Animated background shapes */}
