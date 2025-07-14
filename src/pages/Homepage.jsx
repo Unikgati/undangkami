@@ -174,10 +174,10 @@ const Homepage = () => {
 					{/* Mobile Nav */}
 					{showMobileNav && (
 						<motion.div
-							initial={{ y: 300, opacity: 0 }}
-							animate={{ y: 0, opacity: 1 }}
-							exit={{ y: 300, opacity: 0 }}
-							transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+					initial={{ y: 300 }}
+					animate={{ y: 0 }}
+					exit={{ y: 300 }}
+					transition={{ type: 'tween', duration: 0.35, ease: 'easeOut' }}
 							className="fixed left-0 bottom-0 w-full bg-gradient-to-t from-purple-900/100 to-purple-800/100 z-50 flex flex-col items-center gap-6 py-10 shadow-2xl rounded-t-3xl"
 						>
 							<a
