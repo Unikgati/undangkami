@@ -213,7 +213,7 @@ const Homepage = () => {
 						transition={{ duration: 1 }}
 						className="z-10"
 					>
-						<h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 drop-shadow-lg font-playfair">
+						<h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-4 drop-shadow-lg font-playfair">
 							Undangan Digital{' '}
 							<span className="inline-block relative">
 								<AnimatedWords
@@ -225,11 +225,11 @@ const Homepage = () => {
 							Pilih templatenya, cobain langsung secara gratis!
 						</p>
 <p className="text-lg md:text-2ml text-gray-200 max-w-2xl mx-auto mb-8 font-[Plus Jakarta Sans]">
-  <span className="animated-highlight">#nggkcocoknggkbayar</span>
+  <span className="animated-highlight">Kalau nggk cocok, nggk usah bayar.</span>
 </p>
 						<a
 							href="#templates"
-							className="inline-block px-8 py-4 rounded-full bg-white text-purple-700 font-bold text-lg shadow-lg hover:bg-gray-100 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-300"
+							className="inline-block px-4 py-2 rounded-full border-2 border-white text-white font-semibold text-lg hover:text-purple-700 hover:bg-gray-100 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-300"
 							onClick={(e) => {
 								e.preventDefault();
 								const el = document.getElementById('templates');
