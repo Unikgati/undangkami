@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
@@ -79,6 +81,23 @@ const TemplateCard = ({ template }) => {
 
 const Homepage = () => {
 	const [showMobileNav, setShowMobileNav] = useState(false);
+	const [logoUrl, setLogoUrl] = useState(null);
+
+	useEffect(() => {
+		const fetchLogo = async () => {
+			try {
+				const docRef = doc(db, "webSettings", "logoUrl");
+				const docSnap = await getDoc(docRef);
+				if (docSnap.exists()) {
+					setLogoUrl(docSnap.data().url);
+				}
+			} catch (err) {
+				// fallback: do nothing, will use default logo
+			}
+		};
+		fetchLogo();
+	}, []);
+
 	return (
 		<>
 			<Helmet>
@@ -88,15 +107,32 @@ const Homepage = () => {
 					content="Pilih dari berbagai template undangan digital yang indah. Buat dan bagikan undangan pernikahan Anda dengan mudah."
 				/>
 				<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
+				{/* Animasi stabilo untuk highlight */}
+				<style>{`
+	.animated-highlight {
+	  background: linear-gradient(90deg, #ffe066 60%, #fff 100%);
+	  background-size: 200% 100%;
+	  background-position: -100% 0;
+	  padding: 0.2em 0.4em;
+	  border-radius: 0.3em;
+	  color: #222;
+	  font-weight: bold;
+	  animation: highlightMove 2s infinite alternate;
+	}
+	@keyframes highlightMove {
+	  0% { background-position: -100% 0; }
+	  100% { background-position: 0 0; }
+	}
+  `}</style>
 			</Helmet>
 			<div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 to-purple-900 text-white">
 				{/* Header */}
 				<header className="w-full px-8 py-6 flex items-center justify-between rounded-b-3xl relative">
 					<div className="flex items-center gap-3">
 						<img
-							src="/logo192.png"
+							src={logoUrl || "https://uxwing.com/wp-content/themes/uxwing/download/clothes-and-accessories/diamond-ring-icon.png"}
 							alt="Logo"
-							className="h-10 w-10 rounded-full"
+							className="h-10 w-10"
 						/>
 					</div>
 					{/* Desktop Nav */}
@@ -137,7 +173,7 @@ const Homepage = () => {
 							animate={{ y: 0, opacity: 1 }}
 							exit={{ y: 300, opacity: 0 }}
 							transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-							className="fixed left-0 bottom-0 w-full bg-gradient-to-t from-purple-900/95 to-purple-800/90 z-50 flex flex-col items-center gap-6 py-10 shadow-2xl rounded-t-3xl"
+							className="fixed left-0 bottom-0 w-full bg-gradient-to-t from-purple-900/100 to-purple-800/100 z-50 flex flex-col items-center gap-6 py-10 shadow-2xl rounded-t-3xl"
 						>
 							<a
 								href="/"
@@ -180,12 +216,12 @@ const Homepage = () => {
 								/>
 							</span>
 						</h1>
-<p className="text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto mb-2 font-[Plus Jakarta Sans]">
-							Pilih templatenya, cobain secara gratis, kalau cocok baru deh bayar!
+<p className="text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto mb-4 font-[Plus Jakarta Sans]">
+							Pilih templatenya, cobain langsung secara gratis!
 						</p>
 <p className="text-lg md:text-2ml text-gray-200 max-w-2xl mx-auto mb-8 font-[Plus Jakarta Sans]">
-							#nggkcocoknggkbayar
-						</p>
+  <span className="animated-highlight">#nggkcocoknggkbayar</span>
+</p>
 						<a
 							href="#templates"
 							className="inline-block px-8 py-4 rounded-full bg-white text-purple-700 font-bold text-lg shadow-lg hover:bg-gray-100 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-300"
