@@ -42,37 +42,37 @@ const TemplateCard = ({ template }) => {
 
 	return (
 		<motion.div whileHover={{ y: -10, scale: 1.03 }} transition={{ type: 'spring', stiffness: 300 }}>
-			<Card className="overflow-hidden border border-purple-200 bg-white text-gray-800 rounded-2xl shadow-lg">
+			<Card className="overflow-hidden border border-purple-200 bg-white text-gray-800 rounded-xl shadow-md sm:rounded-2xl sm:shadow-lg">
 				<div className="relative">
 					<img
 						alt={template.name}
-						className="w-full h-64 object-cover"
+						className="w-full aspect-square object-cover"
 						src="https://images.unsplash.com/photo-1595872018818-97555653a011"
 					/>
 					<span className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs bg-purple-100 text-purple-700 font-semibold border border-purple-200">
 						Islamic
 					</span>
 				</div>
-				<CardContent className="p-6">
-					<h3 className="text-xl font-semibold mb-4">{template.name}</h3>
-					<div className="mb-4">
-						<span className="text-gray-400 line-through mr-2 text-sm">Rp{price.toLocaleString('id-ID')}</span>
-						<span className="text-purple-700 font-bold text-lg">Rp{finalPrice.toLocaleString('id-ID')}</span>
+				<CardContent className="p-3 sm:p-4 md:p-6">
+					<h3 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-4">{template.name}</h3>
+					<div className="mb-2 sm:mb-4 flex flex-wrap items-center">
+						<span className="text-gray-400 line-through mr-2 text-xs sm:text-sm">Rp{price.toLocaleString('id-ID')}</span>
+						<span className="text-purple-700 font-bold text-sm sm:text-lg">Rp{finalPrice.toLocaleString('id-ID')}</span>
 						<span className="ml-2 text-xs text-green-600 font-semibold">-{discount}%</span>
 					</div>
-					<div className="flex justify-between gap-2">
+					<div className="flex flex-col sm:flex-row justify-between gap-2 mt-2">
 						<Button
 							variant="outline"
-							className="flex-1 bg-white border border-purple-700 text-purple-700 hover:bg-purple-700 hover:border-purple-800"
+							className="w-full sm:flex-1 py-2 text-xs sm:text-sm bg-white border border-purple-700 text-purple-700 hover:bg-purple-700 hover:text-white hover:border-purple-800"
 							onClick={handlePreview}
 						>
 							Preview
 						</Button>
-<Link to={`/order/${template.id}`} className="flex-1">
-	<Button className="w-full bg-purple-700 text-white hover:bg-purple-800 hover:shadow-lg">
-		Cobain
-	</Button>
-</Link>
+						<Link to={`/order/${template.id}`} className="w-full sm:flex-1">
+							<Button className="w-full py-2 text-xs sm:text-sm bg-purple-700 text-white hover:bg-purple-800 hover:shadow-lg">
+								Cobain
+							</Button>
+						</Link>
 					</div>
 				</CardContent>
 			</Card>
@@ -329,7 +329,7 @@ const Homepage = () => {
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						transition={{ delay: 0.5, duration: 0.8 }}
-						className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10"
+						className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8 lg:gap-10"
 					>
 						{templates.map((template, index) => (
 							<motion.div
