@@ -57,13 +57,16 @@ const ManageMusic = () => {
         setLoading(true);
         setProgress(0);
         try {
-            // Upload ke serverless endpoint Vercel dengan progress
+            // Upload langsung ke Cloudinary unsigned preset
+            const CLOUD_NAME = "dkfue0nxr"; // ganti dengan cloud name Anda
+            const UPLOAD_PRESET = "unsigned_preset"; // ganti dengan unsigned preset Anda
+            const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`;
             const data = new FormData();
             data.append('file', form.file);
-            // Custom XMLHttpRequest for progress
+            data.append('upload_preset', UPLOAD_PRESET);
             await new Promise((resolve, reject) => {
                 const xhr = new window.XMLHttpRequest();
-                xhr.open('POST', '/api/upload-music');
+                xhr.open('POST', url);
                 xhr.upload.onprogress = (e) => {
                     if (e.lengthComputable) {
                         setProgress(Math.round((e.loaded / e.total) * 100));
@@ -72,7 +75,7 @@ const ManageMusic = () => {
                 xhr.onload = async function () {
                     if (xhr.status === 200) {
                         const result = JSON.parse(xhr.responseText);
-                        if (!result.url) return reject(new Error('Upload gagal'));
+                        if (!result.secure_url) return reject(new Error('Upload gagal'));
                         // Simpan ke Firestore
                         const { getApp } = await import('firebase/app');
                         const { getFirestore, collection, addDoc } = await import('firebase/firestore');
@@ -80,7 +83,7 @@ const ManageMusic = () => {
                         await addDoc(collection(db, 'music'), {
                             name: form.name,
                             category: form.category,
-                            url: result.url,
+                            url: result.secure_url,
                             createdAt: new Date(),
                         });
                         toast({ title: 'Berhasil!', description: 'Musik berhasil diunggah.' });
@@ -91,7 +94,7 @@ const ManageMusic = () => {
                     }
                 };
                 xhr.onerror = function () {
-                    reject(new Error('Upload gagal')); 
+                    reject(new Error('Upload gagal'));
                 };
                 xhr.send(data);
             });
