@@ -7,6 +7,8 @@ import { useToast } from '@/components/ui/use-toast';
 
 const ManageMusic = () => {
     const [progress, setProgress] = React.useState(0);
+    const [musicList, setMusicList] = React.useState([]);
+    const [musicLoading, setMusicLoading] = React.useState(true);
     const categories = [
         { value: 'ayat', label: "Ayat Al-Qur'an" },
         { value: 'nasyid', label: 'Nasyid' },
@@ -32,6 +34,23 @@ const ManageMusic = () => {
         category: '',
         file: null,
     });
+
+    // Ambil data musik dari Firestore
+    React.useEffect(() => {
+        let unsub;
+        (async () => {
+            setMusicLoading(true);
+            const { getApp } = await import('firebase/app');
+            const { getFirestore, collection, onSnapshot, query, orderBy } = await import('firebase/firestore');
+            const db = getFirestore(getApp());
+            const q = query(collection(db, 'music'), orderBy('createdAt', 'desc'));
+            unsub = onSnapshot(q, (snap) => {
+                setMusicList(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                setMusicLoading(false);
+            });
+        })();
+        return () => unsub && unsub();
+    }, []);
 
     const handleOpenModal = () => setShowModal(true);
     const handleCloseModal = () => {
@@ -123,7 +142,18 @@ const ManageMusic = () => {
                     <CardTitle>Daftar Musik Latar</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-gray-300">Daftar musik yang tersedia akan ditampilkan di sini. Anda dapat mengunggah file baru atau menghapus yang sudah ada.</p>
+                    {musicLoading ? (
+                        <div className="text-blue-700 font-semibold">Memuat daftar musik...</div>
+                    ) : musicList.length === 0 ? (
+                        <div className="text-gray-400">Belum ada musik yang diunggah.</div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-2 w-full">
+                            {musicList.map((music) => (
+                                <MusicPlayerCard key={music.id} music={music} categories={categories} />
+                            ))}
+                        </div>
+                    )}
+                    <p className="text-gray-300 mt-4">Daftar musik yang tersedia akan ditampilkan di sini. Anda dapat mengunggah file baru atau menghapus yang sudah ada.</p>
                 </CardContent>
             </Card>
 
@@ -209,6 +239,111 @@ const ManageMusic = () => {
                 </div>
             )}
         </motion.div>
+    );
+};
+
+// Komponen custom audio player card
+const MusicPlayerCard = ({ music, categories }) => {
+    const [isPlaying, setIsPlaying] = React.useState(false);
+    const [currentTime, setCurrentTime] = React.useState(0);
+    const [duration, setDuration] = React.useState(0);
+    const audioRef = React.useRef(null);
+
+    // Format waktu mm:ss
+    const formatTime = (sec) => {
+        if (!sec || isNaN(sec)) return '00:00';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
+
+    // Play/pause handler
+    const handlePlayPause = () => {
+        if (!audioRef.current) return;
+        if (isPlaying) {
+            audioRef.current.pause();
+        } else {
+            audioRef.current.play();
+        }
+    };
+
+    // Update time
+    React.useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        const update = () => setCurrentTime(audio.currentTime);
+        const setDur = () => setDuration(audio.duration);
+        audio.addEventListener('timeupdate', update);
+        audio.addEventListener('loadedmetadata', setDur);
+        audio.addEventListener('ended', () => setIsPlaying(false));
+        return () => {
+            audio.removeEventListener('timeupdate', update);
+            audio.removeEventListener('loadedmetadata', setDur);
+            audio.removeEventListener('ended', () => setIsPlaying(false));
+        };
+    }, []);
+
+    // Sync play state
+    React.useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        const onPlay = () => setIsPlaying(true);
+        const onPause = () => setIsPlaying(false);
+        audio.addEventListener('play', onPlay);
+        audio.addEventListener('pause', onPause);
+        return () => {
+            audio.removeEventListener('play', onPlay);
+            audio.removeEventListener('pause', onPause);
+        };
+    }, []);
+
+    // Seek handler
+    const handleSeek = (e) => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        const percent = Number(e.target.value);
+        audio.currentTime = percent * duration / 100;
+        setCurrentTime(audio.currentTime);
+    };
+
+    return (
+        <div
+            className="glass-effect bg-gradient-to-br from-purple-900/40 via-blue-900/30 to-white/10 backdrop-blur-md rounded-2xl px-3 py-6 flex flex-col items-center gap-2 border border-purple-300 shadow-lg hover:scale-[1.03] hover:shadow-2xl transition-all duration-200 cursor-pointer mx-auto"
+            style={{ minWidth: '220px', maxWidth: '260px', minHeight: '100px' }}
+        >
+            <div className="font-bold text-lg text-white text-center line-clamp-2 break-words drop-shadow-lg mb-2">{music.name}</div>
+            <div className="text-xs text-blue-200 text-center">Kategori: <span className="font-semibold text-blue-100">{categories.find(c => c.value === music.category)?.label || music.category}</span></div>
+            <div className="flex flex-col items-center justify-center w-full max-w-xs mt-2">
+                <audio ref={audioRef} src={music.url} preload="metadata" className="hidden" />
+                <div className="flex items-center gap-2 w-full mt-2">
+                    <button
+                        onClick={handlePlayPause}
+                        className="p-2 rounded-lg bg-purple-700 hover:bg-purple-800 text-white shadow flex items-center justify-center"
+                        aria-label={isPlaying ? 'Pause' : 'Play'}
+                    >
+                        {isPlaying ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+                        ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><polygon points="6,4 20,12 6,20" /></svg>
+                        )}
+                    </button>
+                    <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={duration ? Math.round((currentTime / duration) * 100) : 0}
+                        onChange={handleSeek}
+                        className="w-full h-2 accent-purple-700 bg-blue-100 rounded-lg overflow-hidden"
+                        style={{ accentColor: '#7c3aed' }}
+                        aria-label="Seek"
+                    />
+                </div>
+                <div className="flex justify-between w-full text-xs text-white font-semibold mt-1">
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
+                </div>
+            </div>
+        </div>
     );
 };
 
