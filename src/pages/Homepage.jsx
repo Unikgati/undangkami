@@ -362,33 +362,29 @@ useEffect(() => {
 
 				{/* Main Content */}
 				<main className="flex-1 p-8">
-					<motion.div
+					<div
 						id="templates"
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						transition={{ delay: 0.5, duration: 0.8 }}
-						className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8 lg:gap-10"
+						className="masonry-grid"
+						style={{ columnGap: '1.5rem' }}
 					>
+						<style>{`
+							.masonry-grid { column-count: 2; }
+							@media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
+							@media (min-width: 1280px) { .masonry-grid { column-count: 4; } }
+							.masonry-item { break-inside: avoid; margin-bottom: 1.5rem; }
+						`}</style>
 						{loadingTemplates ? (
-							<div className="col-span-full text-center text-gray-300 py-10 text-lg">Memuat template...</div>
+							<div className="text-center text-gray-300 py-10 text-lg masonry-item">Memuat template...</div>
 						) : templates.length === 0 ? (
-							<div className="col-span-full text-center text-gray-400 py-10 text-lg">Belum ada template yang tersedia.</div>
+							<div className="text-center text-gray-400 py-10 text-lg masonry-item">Belum ada template yang tersedia.</div>
 						) : (
 							templates.map((template, index) => (
-								<motion.div
-									key={template.id}
-									initial={{ opacity: 0, y: 50 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{
-										delay: 0.8 + index * 0.2,
-										duration: 0.5,
-									}}
-								>
+								<div key={template.id} className="masonry-item">
 									<TemplateCard template={template} />
-								</motion.div>
+								</div>
 							))
 						)}
-					</motion.div>
+					</div>
 				</main>
 
 				{/* Footer */}
