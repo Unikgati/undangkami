@@ -365,13 +365,13 @@ useEffect(() => {
 					<div
 						id="templates"
 						className="masonry-grid"
-						style={{ columnGap: '1.5rem' }}
+						style={{ columnGap: '1rem' }}
 					>
 						<style>{`
 							.masonry-grid { column-count: 2; }
 							@media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
 							@media (min-width: 1280px) { .masonry-grid { column-count: 4; } }
-							.masonry-item { break-inside: avoid; margin-bottom: 1.5rem; }
+							.masonry-item { break-inside: avoid; margin-bottom: 1rem; }
 						`}</style>
 						{loadingTemplates ? (
 							<div className="text-center text-gray-300 py-10 text-lg masonry-item">Memuat template...</div>
