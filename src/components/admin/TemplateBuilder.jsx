@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import Editor from '@monaco-editor/react';
 import { useNavigate } from 'react-router-dom';
-import { Info, Save, X, Trash2 } from 'lucide-react';
+import { Info, Save, X, Trash2, Loader2 } from 'lucide-react';
 
 
 const LOCAL_STORAGE_KEY = 'templateBuilderCode';
@@ -36,6 +36,7 @@ const TemplateBuilder = () => {
     thumbnailCloudinaryId: '', // public_id Cloudinary (untuk hapus jika diganti)
   });
   const [saving, setSaving] = useState(false);
+  const [modal, setModal] = useState({ show: false, type: '', message: '' });
   const [showCategory, setShowCategory] = useState(false);
   const categoryRef = useReactRef(null);
   const categories = [
@@ -157,7 +158,7 @@ const TemplateBuilder = () => {
           thumbnailCloudinaryId = uploadRes.public_id;
         } catch (uploadErr) {
           console.error('Gagal upload thumbnail baru:', uploadErr);
-          alert('Gagal upload thumbnail baru: ' + uploadErr.message);
+          setModal({ show: true, type: 'error', message: 'Gagal upload thumbnail baru: ' + uploadErr.message });
           setSaving(false);
           return;
         }
@@ -177,13 +178,13 @@ const TemplateBuilder = () => {
         // Tambahkan field lain sesuai kebutuhan
       };
       await saveToFirestore(templateData);
-      alert('Template berhasil disimpan!');
+      setModal({ show: true, type: 'success', message: 'Template berhasil disimpan!' });
       clearLocalStorage();
       // Reset state infoForm jika ingin
       setInfoForm((prev) => ({ ...prev, ...templateData, thumbnail: null, thumbnailCloudinaryUrl: thumbnailUrl, thumbnailCloudinaryId }));
     } catch (err) {
       console.error('Gagal menyimpan template:', err);
-      alert('Gagal menyimpan template: ' + (err.message || err));
+      setModal({ show: true, type: 'error', message: 'Gagal menyimpan template: ' + (err.message || err) });
     } finally {
       setSaving(false);
     }
@@ -289,9 +290,29 @@ const TemplateBuilder = () => {
               <button onClick={handleInfo} className="p-2 rounded hover:bg-blue-800 transition" title="Info Template">
                 <Info className="w-5 h-5 text-blue-400" />
               </button>
-              <button onClick={handleSave} className="p-2 rounded hover:bg-purple-800 transition" title="Simpan">
-                <Save className="w-5 h-5 text-purple-400" />
+              <button onClick={handleSave} className={`p-2 rounded hover:bg-purple-800 transition flex items-center justify-center`} title="Simpan" disabled={saving}>
+                {saving ? (
+                  <Loader2 className="w-5 h-5 text-purple-400 animate-spin" />
+                ) : (
+                  <Save className="w-5 h-5 text-purple-400" />
+                )}
               </button>
+      {/* Modal Notifikasi */}
+      {modal.show && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40">
+          <div className={`bg-white rounded-xl shadow-2xl p-7 min-w-[300px] max-w-[90vw] border-2 ${modal.type === 'success' ? 'border-green-300' : 'border-red-300'}`}>
+            <div className="flex flex-col items-center gap-3">
+              {modal.type === 'success' ? (
+                <svg width="40" height="40" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#4ade80"/><path d="M8 12l2 2 4-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              ) : (
+                <svg width="40" height="40" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#f87171"/><path d="M15 9l-6 6M9 9l6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              )}
+              <div className={`text-lg font-semibold ${modal.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>{modal.message}</div>
+              <button className="mt-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 shadow" onClick={() => setModal({ show: false, type: '', message: '' })}>Tutup</button>
+            </div>
+          </div>
+        </div>
+      )}
               <button onClick={handleClose} className="p-2 rounded hover:bg-gray-800 transition" title="Close">
                 <X className="w-5 h-5 text-gray-400" />
               </button>
