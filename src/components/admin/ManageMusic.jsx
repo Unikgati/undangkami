@@ -97,7 +97,7 @@ const ManageMusic = () => {
                     if (xhr.status === 200) {
                         const result = JSON.parse(xhr.responseText);
                         if (!result.secure_url) return reject(new Error('Upload gagal'));
-                        // Simpan ke Firestore
+                        // Simpan ke Firestore, tambahkan public_id
                         const { getApp } = await import('firebase/app');
                         const { getFirestore, collection, addDoc } = await import('firebase/firestore');
                         const db = getFirestore(getApp());
@@ -105,6 +105,7 @@ const ManageMusic = () => {
                             name: form.name,
                             category: form.category,
                             url: result.secure_url,
+                            public_id: result.public_id,
                             createdAt: new Date(),
                         });
                         toast({ title: 'Berhasil!', description: 'Musik berhasil diunggah.' });
@@ -179,6 +180,14 @@ const ManageMusic = () => {
                                         setDeletingId(confirmDelete.music.id);
                                         setConfirmDelete({ show: false, music: null });
                                         try {
+                                            // Hapus file dari Cloudinary via serverless function
+                                            if (confirmDelete.music.public_id) {
+                                                await fetch('/api/delete-logo', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ public_id: confirmDelete.music.public_id })
+                                                });
+                                            }
                                             // Hapus dokumen dari Firestore
                                             const { getApp } = await import('firebase/app');
                                             const { getFirestore, doc, deleteDoc } = await import('firebase/firestore');
