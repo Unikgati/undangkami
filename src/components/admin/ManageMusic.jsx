@@ -6,6 +6,8 @@ import { Upload, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 const ManageMusic = () => {
+    const [deletingId, setDeletingId] = React.useState(null);
+    const [confirmDelete, setConfirmDelete] = React.useState({ show: false, music: null });
     const [progress, setProgress] = React.useState(0);
     const [musicList, setMusicList] = React.useState([]);
     const [musicLoading, setMusicLoading] = React.useState(true);
@@ -149,13 +151,57 @@ const ManageMusic = () => {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-2 w-full">
                             {musicList.map((music) => (
-                                <MusicPlayerCard key={music.id} music={music} categories={categories} />
+                                <MusicPlayerCard
+                                    key={music.id}
+                                    music={music}
+                                    categories={categories}
+                                    onDelete={() => setConfirmDelete({ show: true, music })}
+                                    deletingId={deletingId}
+                                />
                             ))}
                         </div>
                     )}
                     <p className="text-gray-300 mt-4">Daftar musik yang tersedia akan ditampilkan di sini. Anda dapat mengunggah file baru atau menghapus yang sudah ada.</p>
                 </CardContent>
             </Card>
+
+            {/* Modal konfirmasi hapus musik */}
+            {confirmDelete.show && (
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40">
+                    <div className="bg-white rounded-xl shadow-2xl p-7 min-w-[300px] max-w-[90vw] border-2 border-red-300">
+                        <div className="flex flex-col items-center gap-3">
+                            <svg width="40" height="40" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#f87171"/><path d="M15 9l-6 6M9 9l6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            <div className="text-lg font-semibold text-red-700 text-center">Hapus musik <span className="font-bold">{confirmDelete.music?.name}</span>?</div>
+                            <div className="flex gap-3 mt-2">
+                                <button
+                                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 shadow"
+                                    onClick={async () => {
+                                        setDeletingId(confirmDelete.music.id);
+                                        setConfirmDelete({ show: false, music: null });
+                                        try {
+                                            // Hapus dokumen dari Firestore
+                                            const { getApp } = await import('firebase/app');
+                                            const { getFirestore, doc, deleteDoc } = await import('firebase/firestore');
+                                            const db = getFirestore(getApp());
+                                            await deleteDoc(doc(db, 'music', confirmDelete.music.id));
+                                            setMusicList(prev => prev.filter(m => m.id !== confirmDelete.music.id));
+                                            toast({ title: 'Berhasil dihapus', description: 'Musik berhasil dihapus.' });
+                                        } catch (err) {
+                                            toast({ title: 'Gagal menghapus', description: err.message || String(err) });
+                                        } finally {
+                                            setDeletingId(null);
+                                        }
+                                    }}
+                                >Ya, Hapus</button>
+                                <button
+                                    className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-bold hover:bg-gray-300 shadow"
+                                    onClick={() => setConfirmDelete({ show: false, music: null })}
+                                >Batal</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal Upload Musik - style seragam */}
             {showModal && (
@@ -243,7 +289,7 @@ const ManageMusic = () => {
 };
 
 // Komponen custom audio player card
-const MusicPlayerCard = ({ music, categories }) => {
+const MusicPlayerCard = ({ music, categories, onDelete, deletingId }) => {
     const [isPlaying, setIsPlaying] = React.useState(false);
     const [currentTime, setCurrentTime] = React.useState(0);
     const [duration, setDuration] = React.useState(0);
@@ -311,6 +357,19 @@ const MusicPlayerCard = ({ music, categories }) => {
             className="glass-effect bg-gradient-to-br from-purple-900/40 via-blue-900/30 to-white/10 backdrop-blur-md rounded-2xl px-3 py-6 flex flex-col items-center gap-2 border border-purple-300 shadow-lg hover:scale-[1.03] hover:shadow-2xl transition-all duration-200 cursor-pointer mx-auto"
             style={{ minWidth: '220px', maxWidth: '260px', minHeight: '100px' }}
         >
+            <div className="w-full flex justify-end mb-2">
+                <button
+                    title="Hapus"
+                    className={`p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow flex items-center justify-center ${deletingId === music.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={deletingId === music.id}
+                    onClick={() => {
+                        if (deletingId) return;
+                        onDelete();
+                    }}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m2 0v14a2 2 0 01-2 2H8a2 2 0 01-2-2V6h12z" /></svg>
+                </button>
+            </div>
             <div className="font-bold text-lg text-white text-center line-clamp-2 break-words drop-shadow-lg mb-2">{music.name}</div>
             <div className="text-xs text-blue-200 text-center">Kategori: <span className="font-semibold text-blue-100">{categories.find(c => c.value === music.category)?.label || music.category}</span></div>
             <div className="flex flex-col items-center justify-center w-full max-w-xs mt-2">
