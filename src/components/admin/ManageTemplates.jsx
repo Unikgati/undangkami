@@ -11,6 +11,7 @@ const ManageTemplates = () => {
     const { toast } = useToast();
     const [templates, setTemplates] = useState([]);
     const [deletingId, setDeletingId] = useState(null);
+    const [confirmDelete, setConfirmDelete] = useState({ show: false, template: null });
     const [loading, setLoading] = useState(true);
 
     const handleAction = (action) => {
@@ -105,31 +106,9 @@ const ManageTemplates = () => {
                                             title="Hapus"
                                             className={`p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow flex items-center justify-center ${deletingId === template.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                                             disabled={deletingId === template.id}
-                                            onClick={async () => {
+                                            onClick={() => {
                                                 if (deletingId) return;
-                                                if (!window.confirm('Yakin ingin menghapus template ini?')) return;
-                                                setDeletingId(template.id);
-                                                try {
-                                                    // Hapus gambar dari Cloudinary jika ada
-                                                    if (template.thumbnailCloudinaryId) {
-                                                        await fetch('/api/delete-logo', {
-                                                            method: 'POST',
-                                                            headers: { 'Content-Type': 'application/json' },
-                                                            body: JSON.stringify({ public_id: template.thumbnailCloudinaryId })
-                                                        });
-                                                    }
-                                                    // Hapus dokumen dari Firestore
-                                                    const { getApp } = await import('firebase/app');
-                                                    const { getFirestore, doc, deleteDoc } = await import('firebase/firestore');
-                                                    const db = getFirestore(getApp());
-                                                    await deleteDoc(doc(db, 'templates', template.id));
-                                                    setTemplates(prev => prev.filter(t => t.id !== template.id));
-                                                    toast({ title: 'Berhasil dihapus', description: 'Template berhasil dihapus.' });
-                                                } catch (err) {
-                                                    toast({ title: 'Gagal menghapus', description: err.message || String(err) });
-                                                } finally {
-                                                    setDeletingId(null);
-                                                }
+                                                setConfirmDelete({ show: true, template });
                                             }}
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -155,6 +134,50 @@ const ManageTemplates = () => {
                     )}
                 </CardContent>
             </Card>
+            {confirmDelete.show && (
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40">
+                    <div className="bg-white rounded-xl shadow-2xl p-7 min-w-[300px] max-w-[90vw] border-2 border-red-300">
+                        <div className="flex flex-col items-center gap-3">
+                            <svg width="40" height="40" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#f87171"/><path d="M15 9l-6 6M9 9l6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            <div className="text-lg font-semibold text-red-700 text-center">Hapus template <span className="font-bold">{confirmDelete.template?.name}</span>?</div>
+                            <div className="flex gap-3 mt-2">
+                                <button
+                                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 shadow"
+                                    onClick={async () => {
+                                        setDeletingId(confirmDelete.template.id);
+                                        setConfirmDelete({ show: false, template: null });
+                                        try {
+                                            // Hapus gambar dari Cloudinary jika ada
+                                            if (confirmDelete.template.thumbnailCloudinaryId) {
+                                                await fetch('/api/delete-logo', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ public_id: confirmDelete.template.thumbnailCloudinaryId })
+                                                });
+                                            }
+                                            // Hapus dokumen dari Firestore
+                                            const { getApp } = await import('firebase/app');
+                                            const { getFirestore, doc, deleteDoc } = await import('firebase/firestore');
+                                            const db = getFirestore(getApp());
+                                            await deleteDoc(doc(db, 'templates', confirmDelete.template.id));
+                                            setTemplates(prev => prev.filter(t => t.id !== confirmDelete.template.id));
+                                            toast({ title: 'Berhasil dihapus', description: 'Template berhasil dihapus.' });
+                                        } catch (err) {
+                                            toast({ title: 'Gagal menghapus', description: err.message || String(err) });
+                                        } finally {
+                                            setDeletingId(null);
+                                        }
+                                    }}
+                                >Ya, Hapus</button>
+                                <button
+                                    className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-bold hover:bg-gray-300 shadow"
+                                    onClick={() => setConfirmDelete({ show: false, template: null })}
+                                >Batal</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </motion.div>
     );
 };
