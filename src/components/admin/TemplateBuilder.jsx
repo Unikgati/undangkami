@@ -1,6 +1,7 @@
+
 import React, { useState, useRef, useRef as useReactRef } from 'react';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { getApp } from 'firebase/app';
+import { getFirestore, collection, addDoc, setDoc, doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import Editor from '@monaco-editor/react';
@@ -24,6 +25,7 @@ const TemplateBuilder = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [infoForm, setInfoForm] = useState({
+    templateId: '', // Jika edit, isi dengan ID dokumen Firestore
     thumbnail: null, // File object (belum diupload)
     thumbnailUrl: '', // Preview URL lokal
     name: '',
@@ -119,9 +121,17 @@ const TemplateBuilder = () => {
   };
   // Placeholder: simpan data ke Firestore
   const saveToFirestore = async (templateData) => {
-    // Simpan data template ke koleksi 'templates' dengan ID auto
+    // Jika ada templateId, update dokumen, jika tidak, tambah baru
     const db = getFirestore(getApp());
-    await addDoc(collection(db, 'templates'), templateData);
+    if (templateData.templateId) {
+      const ref = doc(db, 'templates', templateData.templateId);
+      await setDoc(ref, templateData, { merge: true });
+    } else {
+      const ref = await addDoc(collection(db, 'templates'), templateData);
+      templateData.templateId = ref.id;
+      // Update dokumen dengan ID-nya sendiri agar bisa diedit di masa depan
+      await setDoc(ref, templateData, { merge: true });
+    }
     return true;
   };
 
@@ -154,6 +164,7 @@ const TemplateBuilder = () => {
       }
       // Siapkan data template
       const templateData = {
+        templateId: infoForm.templateId,
         name: infoForm.name,
         price: infoForm.price,
         discount: infoForm.discount,
@@ -161,14 +172,15 @@ const TemplateBuilder = () => {
         thumbnail: thumbnailUrl,
         thumbnailCloudinaryId,
         code: { ...code },
-        createdAt: new Date().toISOString(),
+        createdAt: infoForm.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         // Tambahkan field lain sesuai kebutuhan
       };
       await saveToFirestore(templateData);
       alert('Template berhasil disimpan!');
       clearLocalStorage();
       // Reset state infoForm jika ingin
-      setInfoForm((prev) => ({ ...prev, thumbnail: null, thumbnailCloudinaryUrl: thumbnailUrl, thumbnailCloudinaryId }));
+      setInfoForm((prev) => ({ ...prev, ...templateData, thumbnail: null, thumbnailCloudinaryUrl: thumbnailUrl, thumbnailCloudinaryId }));
     } catch (err) {
       console.error('Gagal menyimpan template:', err);
       alert('Gagal menyimpan template: ' + (err.message || err));
