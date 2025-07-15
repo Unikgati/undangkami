@@ -116,7 +116,28 @@ const ManageTemplates = () => {
                                         <button
                                             title="Duplikat"
                                             className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow flex items-center justify-center"
-                                            onClick={() => {/* TODO: handle duplicate */}}
+                                            onClick={async () => {
+                                                try {
+                                                    // Buat salinan data template
+                                                    const { getApp } = await import('firebase/app');
+                                                    const { getFirestore, collection, addDoc } = await import('firebase/firestore');
+                                                    const db = getFirestore(getApp());
+                                                    const newData = {
+                                                        ...template,
+                                                        name: template.name + ' (Copy)',
+                                                        status: 'draft',
+                                                        createdAt: new Date().toISOString(),
+                                                        updatedAt: new Date().toISOString(),
+                                                    };
+                                                    delete newData.id;
+                                                    // Simpan ke Firestore
+                                                    const ref = await addDoc(collection(db, 'templates'), newData);
+                                                    setTemplates(prev => [{ id: ref.id, ...newData }, ...prev]);
+                                                    toast({ title: 'Berhasil duplikat', description: 'Template berhasil diduplikat.' });
+                                                } catch (err) {
+                                                    toast({ title: 'Gagal duplikat', description: err.message || String(err) });
+                                                }
+                                            }}
                                         >
                                             <Copy className="w-4 h-4" />
                                         </button>
