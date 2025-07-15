@@ -104,7 +104,8 @@ useEffect(() => {
 	  const db = getFirestore(getApp());
 	  const querySnapshot = await getDocs(collection(db, 'templates'));
 	  const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-	  setTemplates(data);
+	  // Filter hanya yang status publish
+	  setTemplates(data.filter(t => t.status === 'publish'));
 	} catch (err) {
 	  // Optionally show toast or error
 	} finally {
