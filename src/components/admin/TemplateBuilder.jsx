@@ -1,15 +1,21 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useRef as useReactRef } from 'react';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getApp } from 'firebase/app';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import Editor from '@monaco-editor/react';
 import { useNavigate } from 'react-router-dom';
-import { Info, Save, X } from 'lucide-react';
+import { Info, Save, X, Trash2 } from 'lucide-react';
 
-const initialCode = {
-  html: '<div>Hello World!</div>',
-  css: 'div { color: purple; }',
-  js: 'console.log("Hello World!");'
-};
+
+const LOCAL_STORAGE_KEY = 'templateBuilderCode';
+const initialCode = (() => {
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return { html: '', css: '', js: '' };
+})();
 
 const TemplateBuilder = () => {
   const [activeTab, setActiveTab] = useState('html');
@@ -17,11 +23,42 @@ const TemplateBuilder = () => {
   const [editorWidth, setEditorWidth] = useState(50); // persentase
   const [isDragging, setIsDragging] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [infoForm, setInfoForm] = useState({
+    thumbnail: null, // File object (belum diupload)
+    thumbnailUrl: '', // Preview URL lokal
+    name: '',
+    price: '',
+    discount: '',
+    category: '',
+    thumbnailCloudinaryUrl: '', // URL Cloudinary (jika sudah pernah upload)
+    thumbnailCloudinaryId: '', // public_id Cloudinary (untuk hapus jika diganti)
+  });
+  const [saving, setSaving] = useState(false);
+  const [showCategory, setShowCategory] = useState(false);
+  const categoryRef = useReactRef(null);
+  const categories = [
+    { value: 'islamic', label: 'Islamic' },
+    { value: 'modern', label: 'Modern' },
+    { value: 'classic', label: 'Classic' },
+    { value: 'simple', label: 'Simple' },
+    { value: 'exclusive', label: 'Exclusive' },
+  ];
+  const [priceDisplay, setPriceDisplay] = useState('');
   const dragging = useRef(false);
   const navigate = useNavigate();
 
   const handleEditorChange = (value) => {
-    setCode({ ...code, [activeTab]: value });
+    const updated = { ...code, [activeTab]: value };
+    setCode(updated);
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+    } catch {}
+  };
+  // Clear localStorage on save/close if desired (optional, can remove if you want to persist always)
+  const clearLocalStorage = () => {
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+    } catch {}
   };
 
   const getPreviewContent = () => {
@@ -32,15 +69,161 @@ const TemplateBuilder = () => {
     `;
   };
 
-  const handleSave = () => {
-    // TODO: implement save logic (e.g. to Firestore)
-    alert('Template berhasil disimpan!');
+  // Placeholder: upload file ke Cloudinary, return { url, public_id }
+  const uploadToCloudinary = async (file) => {
+    // Upload langsung ke Cloudinary pakai unsigned preset (lihat WebAppSettings.jsx)
+    const CLOUD_NAME = "dkfue0nxr"; // Ganti dengan cloud name Anda
+    const UPLOAD_PRESET = "unsigned_preset"; // Ganti dengan unsigned preset Anda
+    const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
+    let res, data;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        body: formData
+      });
+      data = await res.json();
+    } catch (err) {
+      console.error('Network error saat upload ke Cloudinary:', err);
+      throw new Error('Network error saat upload ke Cloudinary');
+    }
+    if (data.secure_url && data.public_id) {
+      return { url: data.secure_url, public_id: data.public_id };
+    } else {
+      console.error('Cloudinary response error:', data);
+      throw new Error(data.error?.message || 'Upload thumbnail gagal');
+    }
   };
+  // Placeholder: hapus file dari Cloudinary pakai public_id
+  const deleteFromCloudinary = async (publicId) => {
+    // Panggil endpoint serverless untuk hapus gambar dari Cloudinary
+    const res = await fetch('/api/delete-logo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ public_id: publicId })
+    });
+    let data = {};
+    const contentType = res.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      try {
+        data = await res.json();
+      } catch (e) {
+        // ignore parse error, treat as empty json
+        data = {};
+      }
+    }
+    if (res.ok && (data.success === undefined || data.success === true)) return true;
+    throw new Error(data.error || 'Gagal menghapus thumbnail lama di Cloudinary');
+  };
+  // Placeholder: simpan data ke Firestore
+  const saveToFirestore = async (templateData) => {
+    // Simpan data template ke koleksi 'templates' dengan ID auto
+    const db = getFirestore(getApp());
+    await addDoc(collection(db, 'templates'), templateData);
+    return true;
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      let thumbnailUrl = infoForm.thumbnailCloudinaryUrl;
+      let thumbnailCloudinaryId = infoForm.thumbnailCloudinaryId;
+      // Jika ada file thumbnail baru (belum pernah upload atau diganti)
+      if (infoForm.thumbnail) {
+        // Hapus thumbnail lama jika ada
+        if (thumbnailCloudinaryId) {
+          try {
+            await deleteFromCloudinary(thumbnailCloudinaryId);
+          } catch (delErr) {
+            console.error('Gagal menghapus thumbnail lama:', delErr);
+          }
+        }
+        // Upload thumbnail baru
+        try {
+          const uploadRes = await uploadToCloudinary(infoForm.thumbnail);
+          thumbnailUrl = uploadRes.url;
+          thumbnailCloudinaryId = uploadRes.public_id;
+        } catch (uploadErr) {
+          console.error('Gagal upload thumbnail baru:', uploadErr);
+          alert('Gagal upload thumbnail baru: ' + uploadErr.message);
+          setSaving(false);
+          return;
+        }
+      }
+      // Siapkan data template
+      const templateData = {
+        name: infoForm.name,
+        price: infoForm.price,
+        discount: infoForm.discount,
+        category: infoForm.category,
+        thumbnail: thumbnailUrl,
+        thumbnailCloudinaryId,
+        code: { ...code },
+        createdAt: new Date().toISOString(),
+        // Tambahkan field lain sesuai kebutuhan
+      };
+      await saveToFirestore(templateData);
+      alert('Template berhasil disimpan!');
+      clearLocalStorage();
+      // Reset state infoForm jika ingin
+      setInfoForm((prev) => ({ ...prev, thumbnail: null, thumbnailCloudinaryUrl: thumbnailUrl, thumbnailCloudinaryId }));
+    } catch (err) {
+      console.error('Gagal menyimpan template:', err);
+      alert('Gagal menyimpan template: ' + (err.message || err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleClose = () => {
+    clearLocalStorage(); // Optional: clear after close
     navigate(-1);
   };
   const handleInfo = () => {
     setShowInfo(true);
+  };
+
+  const formatRibuan = (val) => {
+    if (!val) return '';
+    return val.toString().replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  const handleInfoChange = (e) => {
+    const { name, value, type, files } = e.target;
+    if (type === 'file') {
+      const file = files[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        setInfoForm((prev) => ({ ...prev, thumbnail: file, thumbnailUrl: url }));
+      }
+    } else if (name === 'price') {
+      // Only allow numbers
+      const raw = value.replace(/\D/g, '');
+      setPriceDisplay(formatRibuan(raw));
+      setInfoForm((prev) => ({ ...prev, price: raw }));
+    } else {
+      setInfoForm((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Custom dropdown: close on click outside
+  React.useEffect(() => {
+    if (!showCategory) return;
+    function handleClick(e) {
+      if (categoryRef.current && !categoryRef.current.contains(e.target)) {
+        setShowCategory(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showCategory]);
+
+  const handleInfoSubmit = (e) => {
+    e.preventDefault();
+    // Data hanya disimpan di state, tidak upload ke Cloudinary/Firestore
+    setShowInfo(false);
   };
 
   // Drag handler
@@ -76,6 +259,9 @@ const TemplateBuilder = () => {
       window.removeEventListener('touchend', up);
     };
   }, []);
+  React.useEffect(() => {
+    setPriceDisplay(formatRibuan(infoForm.price));
+  }, [showInfo]);
 
   return (
     <div className="fixed inset-0 z-50 bg-gray-900 text-white flex flex-col md:flex-row gap-0 w-screen h-screen select-none">
@@ -133,17 +319,148 @@ const TemplateBuilder = () => {
       </div>
       {/* Modal Info Template */}
       {showInfo && (
-        <div className="fixed inset-0 z-70 flex items-center justify-center bg-black/50">
-          <div className="bg-white text-gray-900 rounded-lg shadow-lg p-6 min-w-[300px] max-w-[90vw]">
-            <h2 className="text-lg font-bold mb-2">Info Template</h2>
-            <p className="mb-4">Template ini berisi HTML, CSS, dan JavaScript yang dapat Anda edit dan preview secara real-time. Simpan untuk menyimpan perubahan.</p>
-            <Button onClick={() => setShowInfo(false)} className="bg-blue-700 text-white hover:bg-blue-800 w-full">Tutup</Button>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-gradient-to-br from-blue-50 via-white to-purple-100 border-2 border-blue-200 shadow-2xl rounded-2xl p-0 min-w-[340px] max-w-[95vw] w-full md:w-[420px] animate-fadeIn">
+            <form onSubmit={handleInfoSubmit} className="flex flex-col gap-5 p-7">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-xl font-bold text-blue-800 tracking-tight">Info Template</h2>
+                <button type="button" onClick={() => setShowInfo(false)} className="rounded-full p-1.5 transition bg-gray-100 hover:bg-purple-100 border border-transparent hover:border-purple-400 text-gray-400 hover:text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              {/* Thumbnail upload & preview + delete */}
+              <div>
+                <label className="block text-sm font-semibold text-blue-700 mb-1">Gambar Thumbnail</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    name="thumbnail"
+                    onChange={handleInfoChange}
+                    className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    disabled={!!infoForm.thumbnailCloudinaryId}
+                  />
+                  {infoForm.thumbnailUrl && (
+                    <div className="relative">
+                      <img src={infoForm.thumbnailUrl} alt="Thumbnail preview" className="w-16 h-16 object-cover rounded-lg border-2 border-purple-200 shadow" />
+                      {infoForm.thumbnailCloudinaryId && (
+                        <button
+                          type="button"
+                          title="Hapus thumbnail lama"
+                          className="absolute -top-2 -right-2 bg-white border border-purple-200 rounded-full p-1 shadow hover:bg-red-100"
+                          onClick={async () => {
+                            if (!window.confirm('Hapus thumbnail lama dari Cloudinary?')) return;
+                            try {
+                              await deleteFromCloudinary(infoForm.thumbnailCloudinaryId);
+                              setInfoForm((prev) => ({
+                                ...prev,
+                                thumbnailCloudinaryId: '',
+                                thumbnailCloudinaryUrl: '',
+                                thumbnail: null,
+                                thumbnailUrl: '',
+                              }));
+                              alert('Thumbnail lama berhasil dihapus. Silakan upload thumbnail baru.');
+                            } catch (err) {
+                              alert('Gagal menghapus thumbnail lama: ' + (err.message || err));
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {infoForm.thumbnailCloudinaryId && (
+                  <p className="text-xs text-red-500 mt-1">Hapus thumbnail lama terlebih dahulu sebelum upload baru.</p>
+                )}
+              </div>
+              {/* Nama template */}
+              <div>
+                <label className="block text-sm font-semibold text-blue-700 mb-1">Nama Template</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={infoForm.name}
+                  onChange={handleInfoChange}
+                  className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-gray-900 font-medium placeholder-gray-400"
+                  placeholder="Masukkan nama template"
+                  required
+                />
+              </div>
+              {/* Harga template & Diskon */}
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-blue-700 mb-1">Harga</label>
+                  <input
+                    type="text"
+                    name="price"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    value={priceDisplay}
+                    onChange={handleInfoChange}
+                    className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-gray-900 font-medium placeholder-gray-400"
+                    placeholder="0"
+                    required
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-blue-700 mb-1">Diskon (%)</label>
+                  <input
+                    type="number"
+                    name="discount"
+                    value={infoForm.discount}
+                    onChange={handleInfoChange}
+                    className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-gray-900 font-medium placeholder-gray-400"
+                    placeholder="0"
+                    min="0"
+                    max="100"
+                  />
+                </div>
+              </div>
+              {/* Kategori template - custom dropdown */}
+              <div className="relative" ref={categoryRef}>
+                <label className="block text-sm font-semibold text-blue-700 mb-1">Kategori</label>
+                <button
+                  type="button"
+                  className={`w-full px-3 py-2 border-2 border-blue-200 rounded-lg bg-white text-gray-900 font-medium flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-purple-400 transition ${showCategory ? 'ring-2 ring-purple-400' : ''}`}
+                  onClick={() => setShowCategory((v) => !v)}
+                  tabIndex={0}
+                  aria-haspopup="listbox"
+                  aria-expanded={showCategory}
+                  required
+                >
+                  <span>{categories.find(c => c.value === infoForm.category)?.label || 'Pilih kategori'}</span>
+                  <svg className={`w-4 h-4 ml-2 transition-transform ${showCategory ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </button>
+                {showCategory && (
+                  <ul className="absolute left-0 right-0 mt-2 bg-white border-2 border-blue-200 rounded-lg shadow-lg z-50 animate-fadeIn overflow-hidden">
+                    {categories.map((cat) => (
+                      <li
+                        key={cat.value}
+                        className={`px-4 py-2 cursor-pointer hover:bg-purple-100 text-gray-900 ${infoForm.category === cat.value ? 'bg-purple-50 font-bold text-purple-700' : ''}`}
+                        onClick={() => {
+                          setInfoForm((prev) => ({ ...prev, category: cat.value }));
+                          setShowCategory(false);
+                        }}
+                        tabIndex={0}
+                        role="option"
+                        aria-selected={infoForm.category === cat.value}
+                      >
+                        {cat.label}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <Button type="submit" className="bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 w-full mt-2 py-2 rounded-lg shadow-lg transition-all text-base tracking-wide">Simpan Info</Button>
+            </form>
           </div>
         </div>
       )}
       {/* Drag bar */}
       <div
-        className={`w-0.5 h-full bg-gray-800 cursor-col-resize z-50 transition hover:bg-gray-500 ${isDragging ? 'bg-purple-900' : ''}`}
+        className={`w-0.5 h-full bg-gray-800 cursor-col-resize z-30 transition hover:bg-gray-500 ${isDragging ? 'bg-purple-900' : ''}`}
         style={{ touchAction: 'none', position: 'relative' }}
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
