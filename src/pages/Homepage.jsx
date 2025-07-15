@@ -41,18 +41,19 @@ const TemplateCard = ({ template }) => {
 	const finalPrice = price * (1 - discount / 100);
 
 	return (
-		<motion.div whileHover={{ y: -10, scale: 1.03 }} transition={{ type: 'spring', stiffness: 300 }}>
-			<Card className="overflow-hidden border border-purple-200 bg-white text-gray-800 rounded-xl shadow-md sm:rounded-2xl sm:shadow-lg">
-				<div className="relative">
-					<img
-						alt={template.name}
-						className="w-full aspect-square object-cover"
-						src="https://images.unsplash.com/photo-1595872018818-97555653a011"
-					/>
-					<span className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs bg-purple-100 text-purple-700 font-semibold border border-purple-200">
-						Islamic
-					</span>
-				</div>
+	<motion.div whileHover={{ y: -10, scale: 1.03 }} transition={{ type: 'spring', stiffness: 300 }}>
+		<Card className="overflow-hidden border border-purple-200 bg-white text-gray-800 rounded-xl shadow-md sm:rounded-2xl sm:shadow-lg">
+			<div className="relative w-full aspect-square bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center">
+				<img
+					alt={template.name}
+					className="w-full h-full object-cover"
+					src={template.thumbnail || "https://images.unsplash.com/photo-1595872018818-97555653a011"}
+					style={{ aspectRatio: '1/1', display: 'block' }}
+				/>
+				<span className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs bg-purple-100 text-purple-700 font-semibold border border-purple-200">
+					{template.category || 'Islamic'}
+				</span>
+			</div>
 				<CardContent className="p-3 sm:p-4 md:p-6">
 					<h3 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-4">{template.name}</h3>
 					<div className="mb-2 sm:mb-4 flex flex-wrap items-center">
@@ -81,9 +82,29 @@ const TemplateCard = ({ template }) => {
 };
 
 const Homepage = () => {
-	const [showMobileNav, setShowMobileNav] = useState(false);
-	const [logoUrl, setLogoUrl] = useState(null);
+const [showMobileNav, setShowMobileNav] = useState(false);
+const [logoUrl, setLogoUrl] = useState(null);
+const [templates, setTemplates] = useState([]);
+const [loadingTemplates, setLoadingTemplates] = useState(true);
 
+useEffect(() => {
+  const fetchTemplates = async () => {
+	setLoadingTemplates(true);
+	try {
+	  const { getApp } = await import('firebase/app');
+	  const { getFirestore, collection, getDocs } = await import('firebase/firestore');
+	  const db = getFirestore(getApp());
+	  const querySnapshot = await getDocs(collection(db, 'templates'));
+	  const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+	  setTemplates(data);
+	} catch (err) {
+	  // Optionally show toast or error
+	} finally {
+	  setLoadingTemplates(false);
+	}
+  };
+  fetchTemplates();
+}, []);
 	useEffect(() => {
 		// Real-time listener agar logo langsung update jika berubah di Firestore
 		const docRef = doc(db, "settings", "webapp");
@@ -339,19 +360,25 @@ const Homepage = () => {
 						transition={{ delay: 0.5, duration: 0.8 }}
 						className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8 lg:gap-10"
 					>
-						{templates.map((template, index) => (
-							<motion.div
-								key={template.id}
-								initial={{ opacity: 0, y: 50 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{
-									delay: 0.8 + index * 0.2,
-									duration: 0.5,
-								}}
-							>
-								<TemplateCard template={template} />
-							</motion.div>
-						))}
+						{loadingTemplates ? (
+							<div className="col-span-full text-center text-gray-300 py-10 text-lg">Memuat template...</div>
+						) : templates.length === 0 ? (
+							<div className="col-span-full text-center text-gray-400 py-10 text-lg">Belum ada template yang tersedia.</div>
+						) : (
+							templates.map((template, index) => (
+								<motion.div
+									key={template.id}
+									initial={{ opacity: 0, y: 50 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{
+										delay: 0.8 + index * 0.2,
+										duration: 0.5,
+									}}
+								>
+									<TemplateCard template={template} />
+								</motion.div>
+							))
+						)}
 					</motion.div>
 				</main>
 

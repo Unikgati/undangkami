@@ -144,7 +144,28 @@ const ManageTemplates = () => {
                                         <button
                                             title={template.status === 'publish' ? 'Published' : 'Draft'}
                                             className={`p-2 rounded-lg ${template.status === 'publish' ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-500 hover:bg-gray-600'} text-white shadow flex items-center justify-center`}
-                                            onClick={() => {/* TODO: handle status toggle */}}
+                                            onClick={async () => {
+                                                try {
+                                                    const { getApp } = await import('firebase/app');
+                                                    const { getFirestore, doc, updateDoc } = await import('firebase/firestore');
+                                                    const db = getFirestore(getApp());
+                                                    const newStatus = template.status === 'publish' ? 'draft' : 'publish';
+                                                    await updateDoc(doc(db, 'templates', template.id), {
+                                                        status: newStatus,
+                                                        updatedAt: new Date().toISOString(),
+                                                    });
+                                                    setTemplates(prev => prev.map(t => t.id === template.id ? { ...t, status: newStatus, updatedAt: new Date().toISOString() } : t));
+                                                    toast({
+                                                        title: 'Status diubah',
+                                                        description: `Template diubah menjadi ${newStatus}.`,
+                                                    });
+                                                } catch (err) {
+                                                    toast({
+                                                        title: 'Gagal mengubah status',
+                                                        description: err.message || String(err),
+                                                    });
+                                                }
+                                            }}
                                         >
                                             {template.status === 'publish' ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
                                         </button>
