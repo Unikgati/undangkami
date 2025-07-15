@@ -1,12 +1,12 @@
 
-import React, { useState, useRef, useRef as useReactRef } from 'react';
+import React, { useState, useRef, useRef as useReactRef, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { getApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, setDoc, doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import Editor from '@monaco-editor/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Info, Save, X, Trash2, Loader2 } from 'lucide-react';
 
 
@@ -20,6 +20,7 @@ const initialCode = (() => {
 })();
 
 const TemplateBuilder = () => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('html');
   const [code, setCode] = useState(initialCode);
   const [editorWidth, setEditorWidth] = useState(50); // persentase
@@ -36,6 +37,48 @@ const TemplateBuilder = () => {
     thumbnailCloudinaryUrl: '', // URL Cloudinary (jika sudah pernah upload)
     thumbnailCloudinaryId: '', // public_id Cloudinary (untuk hapus jika diganti)
   });
+  // Fetch template data if editing
+  useEffect(() => {
+    const templateId = location.state?.templateId;
+    if (templateId) {
+      // Only fetch if not already loaded
+      if (!infoForm.templateId || infoForm.templateId !== templateId) {
+        (async () => {
+          try {
+            const { getApp } = await import('firebase/app');
+            const { getFirestore, doc, getDoc } = await import('firebase/firestore');
+            const db = getFirestore(getApp());
+            const ref = doc(db, 'templates', templateId);
+            const snap = await getDoc(ref);
+            if (snap.exists()) {
+              const data = snap.data();
+              setInfoForm(prev => ({
+                ...prev,
+                ...data,
+                templateId: templateId,
+                thumbnail: null,
+                thumbnailUrl: data.thumbnail || '',
+                thumbnailCloudinaryUrl: data.thumbnail || '',
+                thumbnailCloudinaryId: data.thumbnailCloudinaryId || '',
+              }));
+              if (data.code) {
+                setCode({
+                  html: data.code.html || '',
+                  css: data.code.css || '',
+                  js: data.code.js || '',
+                });
+              }
+            }
+          } catch (err) {
+            toast({
+              title: 'Gagal mengambil data template',
+              description: err.message || String(err),
+            });
+          }
+        })();
+      }
+    }
+  }, [location.state?.templateId]);
   const [saving, setSaving] = useState(false);
   const [modal, setModal] = useState({ show: false, type: '', message: '' });
   const [confirmModal, setConfirmModal] = useState({ show: false, onConfirm: null });
@@ -195,6 +238,10 @@ const TemplateBuilder = () => {
       clearLocalStorage();
       // Reset state infoForm jika ingin
       setInfoForm((prev) => ({ ...prev, ...templateData, thumbnail: null, thumbnailCloudinaryUrl: thumbnailUrl, thumbnailCloudinaryId }));
+      // Update initialCode in memory so isDirty reflects the latest saved state
+      initialCode.html = code.html;
+      initialCode.css = code.css;
+      initialCode.js = code.js;
     } catch (err) {
       console.error('Gagal menyimpan template:', err);
       setModal({ show: true, type: 'error', message: 'Gagal menyimpan template: ' + (err.message || err) });
