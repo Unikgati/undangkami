@@ -36,8 +36,8 @@ const TemplateCard = ({ template }) => {
 		// Logika preview atau toast
 	};
 
-	const price = 120000;
-	const discount = 20;
+	const price = Number(template.price) || 0;
+	const discount = Number(template.discount) || 0;
 	const finalPrice = price * (1 - discount / 100);
 
 	return (
@@ -54,30 +54,38 @@ const TemplateCard = ({ template }) => {
 					{template.category || 'Islamic'}
 				</span>
 			</div>
-				<CardContent className="p-3 sm:p-4 md:p-6">
-					<h3 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-4">{template.name}</h3>
-					<div className="mb-2 sm:mb-4 flex flex-wrap items-center">
-						<span className="text-gray-400 line-through mr-2 text-xs sm:text-sm">Rp{price.toLocaleString('id-ID')}</span>
-						<span className="text-purple-700 font-bold text-sm sm:text-lg">Rp{finalPrice.toLocaleString('id-ID')}</span>
-						<span className="ml-2 text-xs text-green-600 font-semibold">-{discount}%</span>
-					</div>
-					<div className="flex flex-col sm:flex-row justify-between gap-2 mt-2">
-						<Button
-							variant="outline"
-							className="w-full sm:flex-1 py-2 text-xs sm:text-sm bg-white border border-purple-700 text-purple-700 hover:bg-purple-700 hover:text-white hover:border-purple-800"
-							onClick={handlePreview}
-						>
-							Preview
+			<CardContent className="p-3 sm:p-4 md:p-6">
+				<h3 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-4">{template.name}</h3>
+				<div className="mb-2 sm:mb-4 flex flex-wrap items-center">
+					{price > 0 ? (
+						<>
+							<span className="text-gray-400 line-through mr-2 text-xs sm:text-sm">Rp{price.toLocaleString('id-ID')}</span>
+							<span className="text-purple-700 font-bold text-sm sm:text-lg">Rp{finalPrice.toLocaleString('id-ID')}</span>
+							{discount > 0 && (
+								<span className="ml-2 text-xs text-green-600 font-semibold">-{discount}%</span>
+							)}
+						</>
+					) : (
+						<span className="text-green-600 font-bold text-sm sm:text-lg">Gratis</span>
+					)}
+				</div>
+				<div className="flex flex-col sm:flex-row justify-between gap-2 mt-2">
+					<Button
+						variant="outline"
+						className="w-full sm:flex-1 py-2 text-xs sm:text-sm bg-white border border-purple-700 text-purple-700 hover:bg-purple-700 hover:text-white hover:border-purple-800"
+						onClick={handlePreview}
+					>
+						Preview
+					</Button>
+					<Link to={`/order/${template.id}`} className="w-full sm:flex-1">
+						<Button className="w-full py-2 text-xs sm:text-sm bg-purple-700 text-white hover:bg-purple-800 hover:shadow-lg">
+							Cobain
 						</Button>
-						<Link to={`/order/${template.id}`} className="w-full sm:flex-1">
-							<Button className="w-full py-2 text-xs sm:text-sm bg-purple-700 text-white hover:bg-purple-800 hover:shadow-lg">
-								Cobain
-							</Button>
-						</Link>
-					</div>
-				</CardContent>
-			</Card>
-		</motion.div>
+					</Link>
+				</div>
+			</CardContent>
+		</Card>
+	</motion.div>
 	);
 };
 
