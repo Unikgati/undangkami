@@ -182,11 +182,15 @@ const ManageMusic = () => {
                                         try {
                                             // Hapus file dari Cloudinary via serverless function
                                             if (confirmDelete.music.public_id) {
-                                                await fetch('/api/delete-logo', {
+                                                const res = await fetch('/api/delete-logo', {
                                                     method: 'POST',
                                                     headers: { 'Content-Type': 'application/json' },
                                                     body: JSON.stringify({ public_id: confirmDelete.music.public_id })
                                                 });
+                                                const result = await res.json();
+                                                if (!result.success) {
+                                                    toast({ title: 'Gagal hapus Cloudinary', description: result.error || JSON.stringify(result) });
+                                                }
                                             }
                                             // Hapus dokumen dari Firestore
                                             const { getApp } = await import('firebase/app');
