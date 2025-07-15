@@ -37,6 +37,7 @@ const TemplateBuilder = () => {
   });
   const [saving, setSaving] = useState(false);
   const [modal, setModal] = useState({ show: false, type: '', message: '' });
+  const [confirmModal, setConfirmModal] = useState({ show: false, onConfirm: null });
   const [showCategory, setShowCategory] = useState(false);
   const categoryRef = useReactRef(null);
   const categories = [
@@ -381,26 +382,47 @@ const TemplateBuilder = () => {
                           type="button"
                           title="Hapus thumbnail lama"
                           className="absolute -top-2 -right-2 bg-white border border-purple-200 rounded-full p-1 shadow hover:bg-red-100"
-                          onClick={async () => {
-                            if (!window.confirm('Hapus thumbnail lama dari Cloudinary?')) return;
-                            try {
-                              await deleteFromCloudinary(infoForm.thumbnailCloudinaryId);
-                              setInfoForm((prev) => ({
-                                ...prev,
-                                thumbnailCloudinaryId: '',
-                                thumbnailCloudinaryUrl: '',
-                                thumbnail: null,
-                                thumbnailUrl: '',
-                              }));
-                              alert('Thumbnail lama berhasil dihapus. Silakan upload thumbnail baru.');
-                            } catch (err) {
-                              alert('Gagal menghapus thumbnail lama: ' + (err.message || err));
-                            }
+                          onClick={() => {
+                            setConfirmModal({
+                              show: true,
+                              onConfirm: async () => {
+                                try {
+                                  await deleteFromCloudinary(infoForm.thumbnailCloudinaryId);
+                                  setInfoForm((prev) => ({
+                                    ...prev,
+                                    thumbnailCloudinaryId: '',
+                                    thumbnailCloudinaryUrl: '',
+                                    thumbnail: null,
+                                    thumbnailUrl: '',
+                                  }));
+                                  setModal({ show: true, type: 'success', message: 'Thumbnail lama berhasil dihapus. Silakan upload thumbnail baru.' });
+                                } catch (err) {
+                                  setModal({ show: true, type: 'error', message: 'Gagal menghapus thumbnail lama: ' + (err.message || err) });
+                                } finally {
+                                  setConfirmModal({ show: false, onConfirm: null });
+                                }
+                              }
+                            });
                           }}
                         >
                           <Trash2 className="w-4 h-4 text-red-500" />
                         </button>
                       )}
+      {/* Modal Konfirmasi Hapus Thumbnail */}
+      {confirmModal.show && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-2xl p-7 min-w-[300px] max-w-[90vw] border-2 border-red-300">
+            <div className="flex flex-col items-center gap-3">
+              <svg width="40" height="40" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#f87171"/><path d="M15 9l-6 6M9 9l6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <div className="text-lg font-semibold text-red-700">Hapus thumbnail lama dari Cloudinary?</div>
+              <div className="flex gap-3 mt-2">
+                <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 shadow" onClick={() => { confirmModal.onConfirm && confirmModal.onConfirm(); }}>Ya, Hapus</button>
+                <button className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-bold hover:bg-gray-300 shadow" onClick={() => setConfirmModal({ show: false, onConfirm: null })}>Batal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
                     </div>
                   )}
                 </div>
