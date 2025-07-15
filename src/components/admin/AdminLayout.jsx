@@ -54,6 +54,7 @@ const AdminLayout = ({ children }) => {
                     animate={{ x: 0 }}
                     transition={{ duration: 0.5, ease: "easeInOut" }}
                     className="w-64 p-4 flex flex-col glass-effect-sidebar border-r border-white/10"
+                    style={{ position: 'sticky', top: 0, height: '100vh', zIndex: 20 }}
                 >
                     <div className="flex items-center gap-3 mb-10">
                         {logoUrl ? (
