@@ -6,6 +6,7 @@ import { Upload, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 const ManageMusic = () => {
+    const [progress, setProgress] = React.useState(0);
     const categories = [
         { value: 'ayat', label: "Ayat Al-Qur'an" },
         { value: 'nasyid', label: 'Nasyid' },
@@ -54,34 +55,51 @@ const ManageMusic = () => {
             return;
         }
         setLoading(true);
+        setProgress(0);
         try {
-            // Upload ke Cloudinary
+            // Upload ke serverless endpoint Vercel dengan progress
             const data = new FormData();
             data.append('file', form.file);
-            data.append('upload_preset', 'undangkami_music'); // Ganti dengan preset Cloudinary Anda
-            const res = await fetch('https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/auto/upload', {
-                method: 'POST',
-                body: data,
+            // Custom XMLHttpRequest for progress
+            await new Promise((resolve, reject) => {
+                const xhr = new window.XMLHttpRequest();
+                xhr.open('POST', '/api/upload-music');
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        setProgress(Math.round((e.loaded / e.total) * 100));
+                    }
+                };
+                xhr.onload = async function () {
+                    if (xhr.status === 200) {
+                        const result = JSON.parse(xhr.responseText);
+                        if (!result.url) return reject(new Error('Upload gagal'));
+                        // Simpan ke Firestore
+                        const { getApp } = await import('firebase/app');
+                        const { getFirestore, collection, addDoc } = await import('firebase/firestore');
+                        const db = getFirestore(getApp());
+                        await addDoc(collection(db, 'music'), {
+                            name: form.name,
+                            category: form.category,
+                            url: result.url,
+                            createdAt: new Date(),
+                        });
+                        toast({ title: 'Berhasil!', description: 'Musik berhasil diunggah.' });
+                        handleCloseModal();
+                        resolve();
+                    } else {
+                        reject(new Error('Upload gagal'));
+                    }
+                };
+                xhr.onerror = function () {
+                    reject(new Error('Upload gagal')); 
+                };
+                xhr.send(data);
             });
-            const result = await res.json();
-            if (!result.secure_url) throw new Error('Upload gagal');
-
-            // Simpan ke Firestore
-            const { getApp } = await import('firebase/app');
-            const { getFirestore, collection, addDoc } = await import('firebase/firestore');
-            const db = getFirestore(getApp());
-            await addDoc(collection(db, 'music'), {
-                name: form.name,
-                category: form.category,
-                url: result.secure_url,
-                createdAt: new Date(),
-            });
-            toast({ title: 'Berhasil!', description: 'Musik berhasil diunggah.' });
-            handleCloseModal();
         } catch (err) {
             toast({ title: 'Gagal upload', description: err.message || 'Terjadi kesalahan.' });
         } finally {
             setLoading(false);
+            setProgress(0);
         }
     };
 
@@ -177,7 +195,12 @@ const ManageMusic = () => {
                                     </ul>
                                 )}
                             </div>
-                            <button type="submit" className="bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 w-full mt-2 py-2 rounded-lg shadow-lg transition-all text-base tracking-wide" disabled={loading}>{loading ? 'Mengunggah...' : 'Simpan'}</button>
+                            <button type="submit" className="bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 w-full mt-2 py-2 rounded-lg shadow-lg transition-all text-base tracking-wide" disabled={loading}>{loading ? 'Menyimpan...' : 'Simpan'}</button>
+                            {loading && (
+                                <div className="w-full h-2 bg-blue-100 rounded-lg overflow-hidden mt-2">
+                                    <div className="h-full bg-gradient-to-r from-purple-400 to-blue-500 animate-pulse" style={{ width: `${progress}%`, transition: 'width 0.2s' }} />
+                                </div>
+                            )}
                         </form>
                     </div>
                 </div>
