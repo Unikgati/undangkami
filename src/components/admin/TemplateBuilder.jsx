@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useRef as useReactRef } from 'react';
+import { toast } from '@/components/ui/use-toast';
 import { getApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, setDoc, doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
@@ -137,7 +138,18 @@ const TemplateBuilder = () => {
     return true;
   };
 
+  // ...existing code...
   const handleSave = async () => {
+    // Validasi wajib isi
+    if (!infoForm.name || !infoForm.price || !infoForm.category) {
+      toast({
+        title: 'Gagal menyimpan',
+        description: 'Nama, harga, dan kategori template wajib diisi.',
+        status: 'error',
+        position: 'top-right',
+      });
+      return;
+    }
     setSaving(true);
     try {
       let thumbnailUrl = infoForm.thumbnailCloudinaryUrl;
@@ -191,9 +203,31 @@ const TemplateBuilder = () => {
     }
   };
 
+  // State untuk modal konfirmasi keluar
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+
+  // Fungsi cek perubahan (dirty)
+  const isDirty = () => {
+    // Bandingkan dengan initialCode
+    return code.html !== initialCode.html || code.css !== initialCode.css || code.js !== initialCode.js;
+  };
+
   const handleClose = () => {
-    clearLocalStorage(); // Optional: clear after close
-    navigate(-1);
+    if (isDirty()) {
+      setShowExitConfirm(true);
+    } else {
+      clearLocalStorage();
+      navigate('/admin/templates', { replace: true });
+    }
+  };
+
+  const confirmExit = () => {
+    clearLocalStorage();
+    setShowExitConfirm(false);
+    navigate('/admin/templates', { replace: true });
+  };
+  const cancelExit = () => {
+    setShowExitConfirm(false);
   };
   const handleInfo = () => {
     setShowInfo(true);
@@ -278,8 +312,9 @@ const TemplateBuilder = () => {
   }, [showInfo]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-gray-900 text-white flex flex-col md:flex-row gap-0 w-screen h-screen select-none">
-      <div className="h-full" style={{ width: `${editorWidth}%` }}>
+    <>
+      <div className="fixed inset-0 z-50 bg-gray-900 text-white flex flex-col md:flex-row gap-0 w-screen h-screen select-none">
+        <div className="h-full" style={{ width: `${editorWidth}%` }}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-0">
           <div className="flex items-center bg-gray-800 border-b border-gray-700">
             <TabsList>
@@ -299,6 +334,21 @@ const TemplateBuilder = () => {
                 )}
               </button>
       {/* Modal Notifikasi */}
+      {/* Modal Konfirmasi keluar jika ada perubahan */}
+      {showExitConfirm && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-2xl p-7 min-w-[300px] max-w-[90vw] border-2 border-yellow-300">
+            <div className="flex flex-col items-center gap-3">
+              <svg width="40" height="40" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fde68a"/><path d="M12 8v4m0 4h.01" stroke="#b45309" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <div className="text-lg font-semibold text-yellow-700">Anda belum menyimpan perubahan. Keluar tanpa menyimpan?</div>
+              <div className="flex gap-3 mt-2">
+                <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 shadow" onClick={confirmExit}>Keluar</button>
+                <button className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-bold hover:bg-gray-300 shadow" onClick={cancelExit}>Batal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {modal.show && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40">
           <div className={`bg-white rounded-xl shadow-2xl p-7 min-w-[300px] max-w-[90vw] border-2 ${modal.type === 'success' ? 'border-green-300' : 'border-red-300'}`}>
@@ -534,7 +584,8 @@ const TemplateBuilder = () => {
           sandbox="allow-scripts"
         />
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
