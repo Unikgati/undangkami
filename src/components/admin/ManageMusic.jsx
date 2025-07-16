@@ -146,7 +146,7 @@ const ManageMusic = () => {
                 </CardHeader>
                 <CardContent>
                     {musicLoading ? (
-                        <div className="text-blue-700 font-semibold">Memuat daftar musik...</div>
+                        <div className="text-gray-300">Memuat daftar musik...</div>
                     ) : musicList.length === 0 ? (
                         <div className="text-gray-400">Belum ada musik yang diunggah.</div>
                     ) : (
