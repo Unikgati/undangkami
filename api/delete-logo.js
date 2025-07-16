@@ -9,6 +9,7 @@ export default async function handler(req, res) {
   }
 
   const { public_id } = req.body;
+  const { resource_type } = req.body;
   if (!public_id) {
     return res.status(400).json({ error: 'public_id diperlukan' });
   }
@@ -20,7 +21,9 @@ export default async function handler(req, res) {
   });
 
   try {
-    await cloudinary.uploader.destroy(public_id, { resource_type: 'video', invalidate: true });
+    // Default resource_type ke 'image' jika tidak ada
+    const type = resource_type || 'image';
+    await cloudinary.uploader.destroy(public_id, { resource_type: type, invalidate: true });
     return res.status(200).json({ success: true });
   } catch (err) {
     return res.status(500).json({ error: err.message });

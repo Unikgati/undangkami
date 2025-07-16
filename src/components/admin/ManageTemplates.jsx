@@ -191,11 +191,15 @@ const ManageTemplates = () => {
                                         try {
                                             // Hapus gambar dari Cloudinary jika ada
                                             if (confirmDelete.template.thumbnailCloudinaryId) {
-                                                await fetch('/api/delete-logo', {
+                                                const res = await fetch('/api/delete-logo', {
                                                     method: 'POST',
                                                     headers: { 'Content-Type': 'application/json' },
                                                     body: JSON.stringify({ public_id: confirmDelete.template.thumbnailCloudinaryId })
                                                 });
+                                                const result = await res.json().catch(() => null);
+                                                if (!res.ok || (result && result.error)) {
+                                                    throw new Error(result?.error || 'Gagal hapus thumbnail Cloudinary');
+                                                }
                                             }
                                             // Hapus dokumen dari Firestore
                                             const { getApp } = await import('firebase/app');
