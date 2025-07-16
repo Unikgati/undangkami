@@ -140,11 +140,11 @@ const ManageMusic = () => {
                     <Upload className="mr-2 h-4 w-4" /> Upload Musik
                 </Button>
             </div>
-            <Card className="glass-effect border-none text-white shadow-lg">
+            <Card className="glass-effect border-none text-white shadow-lg w-full">
                 <CardHeader>
                     <CardTitle>Daftar Musik Latar</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="w-full">
                     {musicLoading ? (
                         <div className="text-blue-700 font-semibold">Memuat daftar musik...</div>
                     ) : musicList.length === 0 ? (
@@ -367,7 +367,7 @@ const MusicPlayerCard = ({ music, categories, onDelete, deletingId }) => {
 
     return (
         <div
-            className="glass-effect bg-gradient-to-br from-purple-900/40 via-blue-900/30 to-white/10 backdrop-blur-md rounded-2xl px-3 py-6 flex flex-col items-center gap-2 border border-purple-300 shadow-lg hover:scale-[1.03] hover:shadow-2xl transition-all duration-200 cursor-pointer mx-auto"
+            className="glass-effect bg-gradient-to-br from-purple-900/40 via-blue-900/30 to-white/10 backdrop-blur-md rounded-2xl px-3 py-6 flex flex-col items-center gap-2 border border-purple-300 shadow-lg hover:scale-[1.03] hover:shadow-2xl transition-all duration-200 cursor-pointer"
             style={{ minWidth: '220px', maxWidth: '260px', minHeight: '100px' }}
         >
             <div className="w-full flex justify-end mb-2">
@@ -385,7 +385,7 @@ const MusicPlayerCard = ({ music, categories, onDelete, deletingId }) => {
             </div>
             <div className="font-bold text-lg text-white text-center line-clamp-2 break-words drop-shadow-lg mb-2">{music.name}</div>
             <div className="text-xs text-blue-200 text-center">Kategori: <span className="font-semibold text-blue-100">{categories.find(c => c.value === music.category)?.label || music.category}</span></div>
-            <div className="flex flex-col items-center justify-center w-full max-w-xs mt-2">
+            <div className="flex flex-col items-center justify-center w-full mt-2">
                 <audio ref={audioRef} src={music.url} preload="metadata" className="hidden" />
                 <div className="flex items-center gap-2 w-full mt-2">
                     <button

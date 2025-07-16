@@ -393,7 +393,7 @@ useEffect(() => {
 						<div className="mb-4 md:mb-0">
 							<p className="text-gray-100">
 								© {new Date().getFullYear()} Undangan Digital. Dibuat dengan{' '}
-								<span className="text-pink-400">❤️</span>.
+								<span className="text-pink-400">🧠</span>.
 							</p>
 						</div>
 						<div className="flex gap-4">
