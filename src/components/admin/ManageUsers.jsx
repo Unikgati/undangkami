@@ -23,6 +23,7 @@ const ManageUsers = () => {
     });
     const [editUserId, setEditUserId] = React.useState(null); // id user yang sedang diedit
     const [loadingSave, setLoadingSave] = React.useState(false);
+    const [loadingDelete, setLoadingDelete] = React.useState(false);
     // Data user dari Firestore
     const [users, setUsers] = React.useState([]);
 
@@ -59,6 +60,7 @@ const ManageUsers = () => {
     // Hapus user dari Firestore dan Firebase Auth
     const handleDeleteUser = async () => {
         if (!deleteUserId) return;
+        setLoadingDelete(true);
         try {
             // Hapus dokumen user dari Firestore
             const { deleteDoc } = await import('firebase/firestore');
@@ -77,6 +79,7 @@ const ManageUsers = () => {
                     title: 'Gagal hapus user dari Auth',
                     description: 'Respons server tidak valid JSON. Kemungkinan ada error pada API serverless atau environment variable.'
                 });
+                setLoadingDelete(false);
                 handleCloseDeleteModal();
                 return;
             }
@@ -85,9 +88,11 @@ const ManageUsers = () => {
             } else {
                 toast({ title: 'User dihapus sebagian', description: 'User dihapus dari database, tapi gagal dihapus dari Auth: ' + (result.error || 'Unknown error') });
             }
+            setLoadingDelete(false);
             handleCloseDeleteModal();
         } catch (err) {
             toast({ title: 'Gagal hapus user', description: err.message || String(err) });
+            setLoadingDelete(false);
         }
     };
     const handleChange = (e) => {
@@ -238,10 +243,16 @@ const ManageUsers = () => {
                             </div>
                             <div className="flex gap-3 mt-2">
                                 <button
-                                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 shadow"
+                                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 shadow flex items-center justify-center min-w-[110px]"
                                     onClick={handleDeleteUser}
+                                    disabled={loadingDelete}
                                 >
-                                    Ya, Hapus
+                                    {loadingDelete ? (
+                                        <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                                        </svg>
+                                    ) : 'Ya, Hapus'}
                                 </button>
                                 <button
                                     className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-bold hover:bg-gray-300 shadow"
