@@ -27,6 +27,7 @@ const OrderForm = () => {
   const [selectedMusicId, setSelectedMusicId] = useState(null);
   const [musicList, setMusicList] = useState([]);
   const [playingId, setPlayingId] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('Semua');
   const audioRefs = React.useRef({});
   React.useEffect(() => {
     let unsub;
@@ -51,6 +52,24 @@ const OrderForm = () => {
     })();
     return () => unsub && unsub();
   }, []);
+
+  // Get unique categories for filter
+  const categoryOptions = React.useMemo(() => {
+    // Capitalize first letter for display
+    const capitalize = str => str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+    const cats = musicList.map(m => m.category).filter(Boolean);
+    const uniqueCats = Array.from(new Set(cats));
+    return ['Semua', ...uniqueCats.map(capitalize)];
+  }, [musicList]);
+
+  // Filtered music list
+  const filteredMusicList = selectedCategory === 'Semua'
+    ? musicList
+    : musicList.filter(m => {
+        // Compare with capitalized category
+        const capitalize = str => str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+        return capitalize(m.category) === selectedCategory;
+      });
   const [akadTimezoneOpen, setAkadTimezoneOpen] = useState(false);
   const akadTimezoneOptions = ["WIB", "WITA", "WIT"];
   const [resepsiTimezoneOpen, setResepsiTimezoneOpen] = useState(false);
@@ -236,77 +255,105 @@ const OrderForm = () => {
                   {currentStep === 4 && (
                     <div className="space-y-6">
                       <h3 className="text-xl font-semibold font-plusjakartasans mb-4">Pilih Musik Latar</h3>
-                      {musicList.length === 0 ? (
+                      {/* Category Filter */}
+                      <div className="mb-2 flex flex-wrap gap-2 items-center">
+                        <span className="text-sm text-white">Filter kategori:</span>
+                        <select
+                          className="bg-purple-900/40 text-white rounded px-2 py-1 border border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                          value={selectedCategory}
+                          onChange={e => setSelectedCategory(e.target.value)}
+                        >
+                          {categoryOptions.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {filteredMusicList.length === 0 ? (
                         <p className="text-gray-300 text-center">Belum ada musik yang tersedia.</p>
                       ) : (
-                        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 rounded-lg bg-white/5 p-2">
-                          {musicList.map((music) => (
-                            <li
-                              key={music.id}
-                              className={`flex flex-row items-center justify-between py-3 px-2 rounded-lg h-full ${selectedMusicId === music.id ? 'bg-purple-900/40 border-2 border-purple-400 shadow-lg' : ''}`}
-                            >
-                              <label className="flex items-center gap-3 cursor-pointer w-full">
-                                <input
-                                  type="radio"
-                                  name="selectedMusic"
-                                  value={music.id}
-                                  checked={selectedMusicId === music.id}
-                                  onChange={() => setSelectedMusicId(music.id)}
-                                  className="accent-purple-700 w-5 h-5"
-                                  style={{ accentColor: '#a78bfa' }}
-                                />
-                                <div className="flex flex-col">
-                                  <span className="font-plusjakartasans text-white text-base font-semibold">{music.title}</span>
-                                  <span className="text-xs text-purple-300 mt-1">{music.category}</span>
-                                </div>
-                              </label>
-                              <div className="flex items-center gap-2 ml-4">
-                                <button
-                                  type="button"
-                                  className={`rounded-full p-2 bg-purple-700 hover:bg-purple-800 transition focus:outline-none focus:ring-2 focus:ring-purple-400`}
-                                  onClick={() => {
-                                    if (playingId === music.id) {
-                                      // Stop: pause and reset to start
-                                      const audio = audioRefs.current[music.id];
-                                      if (audio) {
-                                        audio.pause();
-                                        audio.currentTime = 0;
-                                      }
-                                      setPlayingId(null);
-                                    } else {
-                                      // Stop all others and reset their time
-                                      Object.values(audioRefs.current).forEach(a => {
-                                        if (a) {
-                                          a.pause();
-                                          a.currentTime = 0;
-                                        }
-                                      });
-                                      // Play from start
-                                      const audio = audioRefs.current[music.id];
-                                      if (audio) {
-                                        audio.currentTime = 0;
-                                        audio.play();
-                                      }
-                                      setPlayingId(music.id);
+                        <div className="rounded-lg bg-white/5 p-2" style={{ maxHeight: '340px', overflowY: 'auto' }}>
+                          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {filteredMusicList.map((music) => (
+                              <li
+                                key={music.id}
+                                className={`flex flex-row items-center justify-between py-3 px-2 rounded-lg h-full cursor-pointer ${selectedMusicId === music.id ? 'bg-purple-900/40 border-2 border-purple-400 shadow-lg' : ''}`}
+                                onClick={e => {
+                                  // Prevent double trigger if play button is clicked
+                                  if (e.target.closest('button')) return;
+                                  setSelectedMusicId(music.id);
+                                  // Auto play the selected music
+                                  // Stop all others and reset their time
+                                  Object.values(audioRefs.current).forEach(a => {
+                                    if (a) {
+                                      a.pause();
+                                      a.currentTime = 0;
                                     }
-                                  }}
-                                >
-                                  {playingId === music.id ? (
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" /></svg>
-                                  ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><polygon points="6,4 20,12 6,20" fill="currentColor" /></svg>
-                                  )}
-                                </button>
+                                  });
+                                  const audio = audioRefs.current[music.id];
+                                  if (audio) {
+                                    audio.currentTime = 0;
+                                    audio.play();
+                                  }
+                                  setPlayingId(music.id);
+                                }}
+                              >
+                                <div className="flex items-center gap-3 w-full">
+                                  <button
+                                    type="button"
+                                    className={`rounded-full p-2 bg-purple-700 hover:bg-purple-800 transition focus:outline-none focus:ring-2 focus:ring-purple-400 ${selectedMusicId === music.id ? 'ring-2 ring-purple-400' : ''}`}
+                                    aria-label={playingId === music.id ? 'Stop' : 'Play'}
+                                    onClick={ev => {
+                                      ev.stopPropagation();
+                                      if (playingId === music.id) {
+                                        // Stop: pause and reset to start
+                                        const audio = audioRefs.current[music.id];
+                                        if (audio) {
+                                          audio.pause();
+                                          audio.currentTime = 0;
+                                        }
+                                        setPlayingId(null);
+                                        // Optionally deselect music on stop
+                                        // setSelectedMusicId(null);
+                                      } else {
+                                        // Stop all others and reset their time
+                                        Object.values(audioRefs.current).forEach(a => {
+                                          if (a) {
+                                            a.pause();
+                                            a.currentTime = 0;
+                                          }
+                                        });
+                                        // Play from start
+                                        const audio = audioRefs.current[music.id];
+                                        if (audio) {
+                                          audio.currentTime = 0;
+                                          audio.play();
+                                        }
+                                        setPlayingId(music.id);
+                                        setSelectedMusicId(music.id);
+                                      }
+                                    }}
+                                  >
+                                    {playingId === music.id ? (
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" /></svg>
+                                    ) : (
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><polygon points="6,4 20,12 6,20" fill="currentColor" /></svg>
+                                    )}
+                                  </button>
+                                  <div className="flex flex-col">
+                                    <span className="font-plusjakartasans text-white text-base font-semibold">{music.title}</span>
+                                    <span className="text-xs text-purple-300 mt-1">{music.category ? music.category.charAt(0).toUpperCase() + music.category.slice(1) : ''}</span>
+                                  </div>
+                                </div>
                                 <audio
                                   ref={el => audioRefs.current[music.id] = el}
                                   src={music.url}
                                   onEnded={() => setPlayingId(null)}
                                   style={{ display: 'none' }}
                                 />
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       )}
                     </div>
                   )}
