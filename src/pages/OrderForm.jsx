@@ -24,6 +24,7 @@ const OrderForm = () => {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({});
+  const [selectedMusicId, setSelectedMusicId] = useState(null);
   const [musicList, setMusicList] = useState([]);
   const [playingId, setPlayingId] = useState(null);
   const audioRefs = React.useRef({});
@@ -56,6 +57,11 @@ const OrderForm = () => {
   const resepsiTimezoneOptions = ["WIB", "WITA", "WIT"];
 
   const handleNext = () => {
+    // Validasi pemilihan lagu pada step 4
+    if (currentStep === 4 && !selectedMusicId) {
+      toast({ title: 'Pilih musik latar terlebih dahulu', description: 'Silakan pilih satu lagu sebelum melanjutkan.' });
+      return;
+    }
     setCurrentStep(prev => Math.min(prev + 1, steps.length));
   };
 
@@ -229,27 +235,58 @@ const OrderForm = () => {
                   )}
                   {currentStep === 4 && (
                     <div className="space-y-6">
+                      <h3 className="text-xl font-semibold font-plusjakartasans mb-4">Pilih Musik Latar</h3>
                       {musicList.length === 0 ? (
                         <p className="text-gray-300 text-center">Belum ada musik yang tersedia.</p>
                       ) : (
-                        <ul className="divide-y divide-white/10 rounded-lg bg-white/5 p-2">
+                        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 rounded-lg bg-white/5 p-2">
                           {musicList.map((music) => (
-                            <li key={music.id} className="flex items-center justify-between py-3 px-2">
-                              <div className="flex flex-col">
-                                <span className="font-plusjakartasans text-white text-base font-semibold">{music.title}</span>
-                                <span className="text-xs text-purple-300 mt-1">{music.category}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
+                            <li
+                              key={music.id}
+                              className={`flex flex-row items-center justify-between py-3 px-2 rounded-lg h-full ${selectedMusicId === music.id ? 'bg-purple-900/40 border-2 border-purple-400 shadow-lg' : ''}`}
+                            >
+                              <label className="flex items-center gap-3 cursor-pointer w-full">
+                                <input
+                                  type="radio"
+                                  name="selectedMusic"
+                                  value={music.id}
+                                  checked={selectedMusicId === music.id}
+                                  onChange={() => setSelectedMusicId(music.id)}
+                                  className="accent-purple-700 w-5 h-5"
+                                  style={{ accentColor: '#a78bfa' }}
+                                />
+                                <div className="flex flex-col">
+                                  <span className="font-plusjakartasans text-white text-base font-semibold">{music.title}</span>
+                                  <span className="text-xs text-purple-300 mt-1">{music.category}</span>
+                                </div>
+                              </label>
+                              <div className="flex items-center gap-2 ml-4">
                                 <button
                                   type="button"
                                   className={`rounded-full p-2 bg-purple-700 hover:bg-purple-800 transition focus:outline-none focus:ring-2 focus:ring-purple-400`}
                                   onClick={() => {
                                     if (playingId === music.id) {
-                                      audioRefs.current[music.id]?.pause();
+                                      // Stop: pause and reset to start
+                                      const audio = audioRefs.current[music.id];
+                                      if (audio) {
+                                        audio.pause();
+                                        audio.currentTime = 0;
+                                      }
                                       setPlayingId(null);
                                     } else {
-                                      Object.values(audioRefs.current).forEach(a => a?.pause());
-                                      audioRefs.current[music.id]?.play();
+                                      // Stop all others and reset their time
+                                      Object.values(audioRefs.current).forEach(a => {
+                                        if (a) {
+                                          a.pause();
+                                          a.currentTime = 0;
+                                        }
+                                      });
+                                      // Play from start
+                                      const audio = audioRefs.current[music.id];
+                                      if (audio) {
+                                        audio.currentTime = 0;
+                                        audio.play();
+                                      }
                                       setPlayingId(music.id);
                                     }
                                   }}
