@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { NavLink, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
@@ -22,6 +23,7 @@ const AdminLayout = ({ children }) => {
     const [logoUrl, setLogoUrl] = useState(null);
     // Ambil role dari localStorage
     const [role, setRole] = useState(() => localStorage.getItem('role') || '');
+    const navigate = useNavigate();
 
     useEffect(() => {
         import('firebase/firestore').then(({ onSnapshot }) => {
@@ -38,10 +40,14 @@ const AdminLayout = ({ children }) => {
     }, []);
 
     const handleLogout = () => {
+        localStorage.removeItem('role');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         toast({
-            title: "🚧 Fitur Belum Tersedia",
-            description: "Fitur logout belum diimplementasikan. 🚀",
+            title: "Logout Berhasil",
+            description: "Anda telah keluar dari dashboard.",
         });
+        navigate('/login');
     };
 
     return (
