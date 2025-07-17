@@ -28,6 +28,7 @@ const OrderForm = () => {
   const [musicList, setMusicList] = useState([]);
   const [playingId, setPlayingId] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('Semua');
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const audioRefs = React.useRef({});
   React.useEffect(() => {
     let unsub;
@@ -254,24 +255,40 @@ const OrderForm = () => {
                   )}
                   {currentStep === 4 && (
                     <div className="space-y-6">
-                      <h3 className="text-xl font-semibold font-plusjakartasans mb-4">Pilih Musik Latar</h3>
-                      {/* Category Filter */}
+                      {/* Category Filter - Custom Dropdown */}
                       <div className="mb-2 flex flex-wrap gap-2 items-center">
                         <span className="text-sm text-white">Filter kategori:</span>
-                        <select
-                          className="bg-purple-900/40 text-white rounded px-2 py-1 border border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
-                          value={selectedCategory}
-                          onChange={e => setSelectedCategory(e.target.value)}
-                        >
-                          {categoryOptions.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                          ))}
-                        </select>
+                        <div className="relative w-48">
+                          <button
+                            type="button"
+                            className="flex h-10 w-full items-center justify-between rounded-md border border-purple-400 px-3 py-2 text-sm bg-purple-900/40 text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
+                            onClick={() => setCategoryDropdownOpen((open) => !open)}
+                          >
+                            {selectedCategory}
+                            <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                          </button>
+                          {categoryDropdownOpen && (
+                            <ul className="absolute z-10 mt-1 w-full bg-gray-900 border border-white/20 rounded shadow-lg max-h-56 overflow-y-auto">
+                              {categoryOptions.map((cat) => (
+                                <li
+                                  key={cat}
+                                  className={`px-4 py-2 cursor-pointer hover:bg-purple-700 transition ${selectedCategory === cat ? "bg-purple-700 text-white" : "text-white"}`}
+                                  onClick={() => {
+                                    setSelectedCategory(cat);
+                                    setCategoryDropdownOpen(false);
+                                  }}
+                                >
+                                  {cat}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
                       </div>
                       {filteredMusicList.length === 0 ? (
                         <p className="text-gray-300 text-center">Belum ada musik yang tersedia.</p>
                       ) : (
-                        <div className="rounded-lg bg-white/5 p-2" style={{ maxHeight: '340px', overflowY: 'auto' }}>
+                        <div className="rounded-lg bg-white/5 p-2" style={{ maxHeight: '230px', overflowY: 'auto' }}>
                           <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             {filteredMusicList.map((music) => (
                               <li
