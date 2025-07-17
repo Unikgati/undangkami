@@ -9,13 +9,18 @@ import ManagePayments from '@/components/admin/ManagePayments';
 import ManageUsers from '@/components/admin/ManageUsers';
 import WebAppSettings from '@/components/admin/WebAppSettings';
 import TemplateBuilder from '@/components/admin/TemplateBuilder';
+import RoleRoute from './RoleRoute';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const role = localStorage.getItem('role');
   // Redirect jika belum login
   useEffect(() => {
-    if (!role) navigate('/login');
+    if (!role) {
+      navigate('/login');
+    } else if (role === 'designer' && window.location.pathname === '/admin') {
+      navigate('/admin/templates', { replace: true });
+    }
   }, [role, navigate]);
   return (
     <AdminLayout>
@@ -23,11 +28,31 @@ const AdminDashboard = () => {
         {role === 'admin' && <Route path="/" element={<AdminOverview />} />}
         {(role === 'admin' || role === 'designer') && <Route path="templates" element={<ManageTemplates />} />}
         {(role === 'admin' || role === 'designer') && <Route path="templates/builder" element={<TemplateBuilder />} />}
-        {role === 'admin' && <Route path="music" element={<ManageMusic />} />}
-        {(role === 'admin' || role === 'cs') && <Route path="orders" element={<ManageOrders />} />}
-        {role === 'admin' && <Route path="payments" element={<ManagePayments />} />}
-        {role === 'admin' && <Route path="users" element={<ManageUsers />} />}
-        {role === 'admin' && <Route path="settings" element={<WebAppSettings />} />}
+        <Route path="music" element={
+          <RoleRoute allowedRoles={['admin']}>
+            <ManageMusic />
+          </RoleRoute>
+        } />
+        <Route path="orders" element={
+          <RoleRoute allowedRoles={['admin', 'cs']}>
+            <ManageOrders />
+          </RoleRoute>
+        } />
+        <Route path="payments" element={
+          <RoleRoute allowedRoles={['admin']}>
+            <ManagePayments />
+          </RoleRoute>
+        } />
+        <Route path="users" element={
+          <RoleRoute allowedRoles={['admin']}>
+            <ManageUsers />
+          </RoleRoute>
+        } />
+        <Route path="settings" element={
+          <RoleRoute allowedRoles={['admin']}>
+            <WebAppSettings />
+          </RoleRoute>
+        } />
       </Routes>
     </AdminLayout>
   );

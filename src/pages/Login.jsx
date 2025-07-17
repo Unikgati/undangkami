@@ -30,7 +30,13 @@ const Login = () => {
                 const userData = userDoc.data();
                 localStorage.setItem('role', userData.role);
                 localStorage.setItem('user', JSON.stringify(userData));
-                window.location.href = '/admin';
+                if (userData.role === 'designer') {
+                    window.location.href = '/admin/templates';
+                } else if (userData.role === 'cs') {
+                    window.location.href = '/admin/orders';
+                } else {
+                    window.location.href = '/admin';
+                }
             } else {
                 toast({
                     title: "Login gagal",
