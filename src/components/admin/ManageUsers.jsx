@@ -22,6 +22,7 @@ const ManageUsers = () => {
         whatsapp: '',
     });
     const [editUserId, setEditUserId] = React.useState(null); // id user yang sedang diedit
+    const [loadingSave, setLoadingSave] = React.useState(false);
     // Data user dari Firestore
     const [users, setUsers] = React.useState([]);
 
@@ -95,17 +96,20 @@ const ManageUsers = () => {
     };
     const handleSave = async (e) => {
         e.preventDefault();
+        setLoadingSave(true);
         if (!form.name || !form.username || (!editUserId && !form.password) || !form.role || (form.role === 'cs' && !form.whatsapp)) {
             toast({
                 title: 'Lengkapi semua field',
                 description: 'Semua data wajib diisi. Username hanya boleh huruf, angka, titik, dan underscore, tanpa spasi atau karakter khusus. Username akan digunakan sebagai email login (username@undangkami.com).'
             });
+            setLoadingSave(false);
             return;
         }
         // Validasi username unik di Firestore (kecuali jika edit dan username tidak berubah)
         const usernameExists = users.some(u => u.username === form.username && u.id !== editUserId);
         if (usernameExists) {
             toast({ title: 'Username sudah digunakan', description: 'Silakan pilih username lain.' });
+            setLoadingSave(false);
             return;
         }
         if (editUserId) {
@@ -123,6 +127,7 @@ const ManageUsers = () => {
             } catch (err) {
                 toast({ title: 'Gagal edit user', description: err.message || String(err) });
             }
+            setLoadingSave(false);
         } else {
             // Tambah user baru
             try {
@@ -144,6 +149,7 @@ const ManageUsers = () => {
             } catch (err) {
                 toast({ title: 'Gagal tambah user', description: err.message || String(err) });
             }
+            setLoadingSave(false);
         }
     };
 
@@ -184,30 +190,32 @@ const ManageUsers = () => {
                                 <div className="font-bold text-lg text-white text-left line-clamp-2 break-words drop-shadow-lg">{user.name}</div>
                                 <div className="text-base text-blue-100 text-left break-words font-semibold">{user.role === 'admin' ? 'Admin' : user.role === 'cs' ? 'Customer Service' : user.role === 'designer' ? 'Designer' : user.role}</div>
                                 <div className="absolute top-2 right-2 flex gap-2">
-                                    <button
-                                        className="bg-white/80 hover:bg-purple-200 text-purple-700 rounded-full p-1 shadow transition"
-                                        title="Edit user"
-                                        onClick={() => {
-                                            setEditUserId(user.id);
-                                            setForm({
-                                                name: user.name || '',
-                                                username: user.username || '',
-                                                password: '',
-                                                role: user.role || '',
-                                                whatsapp: user.whatsapp || '',
-                                            });
-                                            setShowModal(true);
-                                        }}
-                                    >
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-                                    </button>
-                                    <button
-                                        className="bg-white/80 hover:bg-red-200 text-red-700 rounded-full p-1 shadow transition"
-                                        title="Hapus user"
-                                        onClick={() => handleOpenDeleteModal(user.id)}
-                                    >
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m5 0V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                    </button>
+                                    <div className="flex gap-2 mt-2">
+                                        <button
+                                            title="Edit"
+                                            className="p-2 rounded-lg bg-purple-700 hover:bg-purple-800 text-white shadow flex items-center justify-center"
+                                            onClick={() => {
+                                                setEditUserId(user.id);
+                                                setForm({
+                                                    name: user.name || '',
+                                                    username: user.username || '',
+                                                    password: '',
+                                                    role: user.role || '',
+                                                    whatsapp: user.whatsapp || '',
+                                                });
+                                                setShowModal(true);
+                                            }}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path><path d="m15 5 4 4"></path></svg>
+                                        </button>
+                                        <button
+                                            title="Hapus"
+                                            className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow flex items-center justify-center"
+                                            onClick={() => handleOpenDeleteModal(user.id)}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -335,9 +343,15 @@ const ManageUsers = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 shadow"
+                                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 shadow flex items-center justify-center min-w-[110px]"
+                                    disabled={loadingSave}
                                 >
-                                    {editUserId ? 'Simpan Perubahan' : 'Simpan'}
+                                    {loadingSave ? (
+                                        <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                                        </svg>
+                                    ) : (editUserId ? 'Simpan Perubahan' : 'Simpan')}
                                 </button>
                             </div>
                         </form>
