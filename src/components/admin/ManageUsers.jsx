@@ -72,11 +72,9 @@ const ManageUsers = () => {
             try {
                 result = await res.json();
             } catch (jsonErr) {
-                // Jika gagal parsing JSON, ambil text dan tampilkan error
-                const text = await res.text();
                 toast({
                     title: 'Gagal hapus user dari Auth',
-                    description: 'Respons server tidak valid JSON: ' + text
+                    description: 'Respons server tidak valid JSON. Kemungkinan ada error pada API serverless atau environment variable.'
                 });
                 handleCloseDeleteModal();
                 return;
