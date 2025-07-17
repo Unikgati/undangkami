@@ -21,8 +21,23 @@ const Login = () => {
         const email = `${username}@undangkami.com`;
         try {
             const auth = getAuth(app);
-            await signInWithEmailAndPassword(auth, email, password);
-            window.location.href = '/admin';
+            const cred = await signInWithEmailAndPassword(auth, email, password);
+            // Ambil data user dari Firestore
+            const { getDoc, doc } = await import('firebase/firestore');
+            const { db } = await import('@/lib/firebase');
+            const userDoc = await getDoc(doc(db, 'users', cred.user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                localStorage.setItem('role', userData.role);
+                localStorage.setItem('user', JSON.stringify(userData));
+                window.location.href = '/admin';
+            } else {
+                toast({
+                    title: "Login gagal",
+                    description: "Data user tidak ditemukan di database.",
+                    variant: "destructive"
+                });
+            }
         } catch (err) {
             toast({
                 title: "Login gagal",

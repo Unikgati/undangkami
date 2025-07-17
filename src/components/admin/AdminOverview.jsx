@@ -11,6 +11,13 @@ const stats = [
 ];
 
 const AdminOverview = () => {
+    // Proteksi akses berdasarkan role
+    React.useEffect(() => {
+        const role = localStorage.getItem('role');
+        if (role === 'designer') window.location.href = '/admin/templates';
+        if (role === 'cs') window.location.href = '/admin/orders';
+        if (role !== 'admin') window.location.href = '/login';
+    }, []);
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}

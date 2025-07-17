@@ -8,6 +8,11 @@ import { useNavigate } from 'react-router-dom';
 
 const ManageTemplates = () => {
     const navigate = useNavigate();
+    React.useEffect(() => {
+        const role = localStorage.getItem('role');
+        if (role === 'cs') window.location.href = '/admin/orders';
+        if (role !== 'admin' && role !== 'designer') window.location.href = '/login';
+    }, []);
     const { toast } = useToast();
     const [templates, setTemplates] = useState([]);
     const [deletingId, setDeletingId] = useState(null);

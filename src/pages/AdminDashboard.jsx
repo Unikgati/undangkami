@@ -12,23 +12,22 @@ import TemplateBuilder from '@/components/admin/TemplateBuilder';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  // useEffect(() => {
-  //   const token = localStorage.getItem('token');
-  //   if (!token) {
-  //     navigate('/login');
-  //   }
-  // }, [navigate]);
+  const role = localStorage.getItem('role');
+  // Redirect jika belum login
+  useEffect(() => {
+    if (!role) navigate('/login');
+  }, [role, navigate]);
   return (
     <AdminLayout>
       <Routes>
-        <Route path="/" element={<AdminOverview />} />
-        <Route path="templates" element={<ManageTemplates />} />
-        <Route path="templates/builder" element={<TemplateBuilder />} />
-        <Route path="music" element={<ManageMusic />} />
-        <Route path="orders" element={<ManageOrders />} />
-        <Route path="payments" element={<ManagePayments />} />
-        <Route path="users" element={<ManageUsers />} />
-        <Route path="settings" element={<WebAppSettings />} />
+        {role === 'admin' && <Route path="/" element={<AdminOverview />} />}
+        {(role === 'admin' || role === 'designer') && <Route path="templates" element={<ManageTemplates />} />}
+        {(role === 'admin' || role === 'designer') && <Route path="templates/builder" element={<TemplateBuilder />} />}
+        {role === 'admin' && <Route path="music" element={<ManageMusic />} />}
+        {(role === 'admin' || role === 'cs') && <Route path="orders" element={<ManageOrders />} />}
+        {role === 'admin' && <Route path="payments" element={<ManagePayments />} />}
+        {role === 'admin' && <Route path="users" element={<ManageUsers />} />}
+        {role === 'admin' && <Route path="settings" element={<WebAppSettings />} />}
       </Routes>
     </AdminLayout>
   );

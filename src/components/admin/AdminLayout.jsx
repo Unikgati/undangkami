@@ -20,6 +20,8 @@ const adminMenuItems = [
 const AdminLayout = ({ children }) => {
     const { toast } = useToast();
     const [logoUrl, setLogoUrl] = useState(null);
+    // Ambil role dari localStorage
+    const [role, setRole] = useState(() => localStorage.getItem('role') || '');
 
     useEffect(() => {
         import('firebase/firestore').then(({ onSnapshot }) => {
@@ -65,7 +67,11 @@ const AdminLayout = ({ children }) => {
                     </div>
                     <nav className="flex-grow">
                         <ul>
-                            {adminMenuItems.map((item) => (
+                            {(role === 'admin' ? adminMenuItems
+                                : role === 'cs' ? [adminMenuItems[3]]
+                                : role === 'designer' ? [adminMenuItems[1]]
+                                : []
+                            ).map((item) => (
                                 <li key={item.title} className="mb-2">
                                     <NavLink 
                                         to={item.path}

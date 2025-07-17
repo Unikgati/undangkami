@@ -4,6 +4,11 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const ManageOrders = () => {
+    React.useEffect(() => {
+        const role = localStorage.getItem('role');
+        if (role === 'designer') window.location.href = '/admin/templates';
+        if (role !== 'admin' && role !== 'cs') window.location.href = '/login';
+    }, []);
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
