@@ -68,7 +68,19 @@ const ManageUsers = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ uid: deleteUserId }),
             });
-            const result = await res.json();
+            let result = null;
+            try {
+                result = await res.json();
+            } catch (jsonErr) {
+                // Jika gagal parsing JSON, ambil text dan tampilkan error
+                const text = await res.text();
+                toast({
+                    title: 'Gagal hapus user dari Auth',
+                    description: 'Respons server tidak valid JSON: ' + text
+                });
+                handleCloseDeleteModal();
+                return;
+            }
             if (res.ok && result.success) {
                 toast({ title: 'User dihapus', description: 'User berhasil dihapus dari database dan Auth.' });
             } else {
@@ -86,7 +98,10 @@ const ManageUsers = () => {
     const handleSave = async (e) => {
         e.preventDefault();
         if (!form.name || !form.username || (!editUserId && !form.password) || !form.role || (form.role === 'cs' && !form.whatsapp)) {
-            toast({ title: 'Lengkapi semua field', description: 'Semua data wajib diisi.' });
+            toast({
+                title: 'Lengkapi semua field',
+                description: 'Semua data wajib diisi. Username hanya boleh huruf, angka, titik, dan underscore, tanpa spasi atau karakter khusus. Username akan digunakan sebagai email login (username@undangkami.com).'
+            });
             return;
         }
         // Validasi username unik di Firestore (kecuali jika edit dan username tidak berubah)
@@ -264,6 +279,7 @@ const ManageUsers = () => {
                                     placeholder="Masukkan username"
                                     required
                                 />
+                                <div className="text-xs text-blue-500 mt-1"></div>
                             </div>
                             {!editUserId && (
                                 <div>
