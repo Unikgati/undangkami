@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { LogIn, Loader2 } from 'lucide-react';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { app } from "@/lib/firebase";
 
 const Login = () => {
     const { toast } = useToast();
@@ -16,27 +18,15 @@ const Login = () => {
         setLoading(true);
         const username = e.target.username.value;
         const password = e.target.password.value;
+        const email = `${username}@undangkami.com`;
         try {
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-            if (res.ok && data.token) {
-                localStorage.setItem('token', data.token);
-                window.location.href = '/admin';
-            } else {
-                toast({
-                    title: "Login gagal",
-                    description: data.error || "Username atau password salah.",
-                    variant: "destructive"
-                });
-            }
+            const auth = getAuth(app);
+            await signInWithEmailAndPassword(auth, email, password);
+            window.location.href = '/admin';
         } catch (err) {
             toast({
                 title: "Login gagal",
-                description: "Terjadi kesalahan koneksi.",
+                description: err.message || "Username atau password salah.",
                 variant: "destructive"
             });
         } finally {
