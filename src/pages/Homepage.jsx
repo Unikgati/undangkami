@@ -372,7 +372,12 @@ useEffect(() => {
 							.masonry-item { break-inside: avoid; margin-bottom: 1rem; }
 						`}</style>
 						{loadingTemplates ? (
-							<div className="text-center text-gray-300 py-10 text-lg masonry-item">Memuat template...</div>
+			<div className="masonry-item flex items-center justify-center" style={{ minHeight: '220px' }}>
+			  <div className="flex flex-col items-center justify-center">
+				<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-400 mb-4"></div>
+				<div className="text-gray-300 text-lg">Memuat template...</div>
+			  </div>
+			</div>
 						) : templates.length === 0 ? (
 							<div className="text-center text-gray-400 py-10 text-lg masonry-item">Belum ada template yang tersedia.</div>
 						) : (

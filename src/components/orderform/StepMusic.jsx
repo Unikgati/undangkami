@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 const StepMusic = ({
   selectedCategory,
@@ -13,6 +13,7 @@ const StepMusic = ({
   setPlayingId
 }) => {
   const audioRef = useRef(null);
+  const [audioLoading, setAudioLoading] = useState(false);
   return (
     <div className="space-y-6">
       {/* Category Filter - Custom Dropdown */}
@@ -61,8 +62,10 @@ const StepMusic = ({
                     audioRef.current.pause();
                     audioRef.current.currentTime = 0;
                     audioRef.current.src = music.url;
+                    setAudioLoading(true);
                     audioRef.current.load();
                     audioRef.current.oncanplay = () => {
+                      setAudioLoading(false);
                       audioRef.current.play().catch(e => console.log('Audio play error:', e));
                     };
                   }
@@ -82,13 +85,16 @@ const StepMusic = ({
                           audioRef.current.currentTime = 0;
                         }
                         setPlayingId(null);
+                        setAudioLoading(false);
                       } else {
                         if (audioRef.current) {
                           audioRef.current.pause();
                           audioRef.current.currentTime = 0;
                           audioRef.current.src = music.url;
+                          setAudioLoading(true);
                           audioRef.current.load();
                           audioRef.current.oncanplay = () => {
+                            setAudioLoading(false);
                             audioRef.current.play().catch(e => console.log('Audio play error:', e));
                           };
                         }
@@ -97,7 +103,9 @@ const StepMusic = ({
                       }
                     }}
                   >
-                    {playingId === music.id ? (
+                    {audioLoading && playingId === music.id ? (
+                      <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
+                    ) : playingId === music.id ? (
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" /></svg>
                     ) : (
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><polygon points="6,4 20,12 6,20" fill="currentColor" /></svg>
@@ -115,6 +123,8 @@ const StepMusic = ({
             ref={audioRef}
             src={playingId ? filteredMusicList.find(m => m.id === playingId)?.url : ''}
             onEnded={() => setPlayingId(null)}
+            onCanPlayThrough={() => setAudioLoading(false)}
+            onError={() => setAudioLoading(false)}
             style={{ width: 0, height: 0, visibility: 'hidden' }}
           />
         </div>
