@@ -1,0 +1,162 @@
+     {/* Modal Info Template */}
+      {showInfo && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-gradient-to-br from-blue-50 via-white to-purple-100 border-2 border-blue-200 shadow-2xl rounded-2xl p-0 min-w-[340px] max-w-[95vw] w-full md:w-[420px] animate-fadeIn">
+            <form onSubmit={handleInfoSubmit} className="flex flex-col gap-5 p-7">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-xl font-bold text-blue-800 tracking-tight">Info Template</h2>
+                <button type="button" onClick={() => setShowInfo(false)} className="rounded-full p-1.5 transition bg-gray-100 hover:bg-purple-100 border border-transparent hover:border-purple-400 text-gray-400 hover:text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              {/* Thumbnail upload & preview + delete */}
+              <div>
+                <label className="block text-sm font-semibold text-blue-700 mb-1">Gambar Thumbnail</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    name="thumbnail"
+                    onChange={handleInfoChange}
+                    className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    disabled={!!infoForm.thumbnailCloudinaryId}
+                  />
+                  {infoForm.thumbnailUrl && (
+                    <div className="relative">
+                      <img src={infoForm.thumbnailUrl} alt="Thumbnail preview" className="w-16 h-16 object-cover rounded-lg border-2 border-purple-200 shadow" />
+                      {infoForm.thumbnailCloudinaryId && (
+                        <button
+                          type="button"
+                          title="Hapus thumbnail lama"
+                          className="absolute -top-2 -right-2 bg-white border border-purple-200 rounded-full p-1 shadow hover:bg-red-100"
+                          onClick={() => {
+                            setConfirmModal({
+                              show: true,
+                              onConfirm: async () => {
+                                try {
+                                  await deleteFromCloudinary(infoForm.thumbnailCloudinaryId);
+                                  setInfoForm((prev) => ({
+                                    ...prev,
+                                    thumbnailCloudinaryId: '',
+                                    thumbnailCloudinaryUrl: '',
+                                    thumbnail: null,
+                                    thumbnailUrl: '',
+                                  }));
+                                  setModal({ show: true, type: 'success', message: 'Thumbnail lama berhasil dihapus. Silakan upload thumbnail baru.' });
+                                } catch (err) {
+                                  setModal({ show: true, type: 'error', message: 'Gagal menghapus thumbnail lama: ' + (err.message || err) });
+                                } finally {
+                                  setConfirmModal({ show: false, onConfirm: null });
+                                }
+                              }
+                            });
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </button>
+                      )}
+      {/* Modal Konfirmasi Hapus Thumbnail */}
+      {confirmModal.show && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-2xl p-7 min-w-[300px] max-w-[90vw] border-2 border-red-300">
+            <div className="flex flex-col items-center gap-3">
+              <svg width="40" height="40" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#f87171"/><path d="M15 9l-6 6M9 9l6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <div className="text-lg font-semibold text-red-700">Hapus thumbnail lama dari Cloudinary?</div>
+              <div className="flex gap-3 mt-2">
+                <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 shadow" onClick={() => { confirmModal.onConfirm && confirmModal.onConfirm(); }}>Ya, Hapus</button>
+                <button className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-bold hover:bg-gray-300 shadow" onClick={() => setConfirmModal({ show: false, onConfirm: null })}>Batal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+                    </div>
+                  )}
+                </div>
+                {infoForm.thumbnailCloudinaryId && (
+                  <p className="text-xs text-red-500 mt-1">Hapus thumbnail lama terlebih dahulu sebelum upload baru.</p>
+                )}
+              </div>
+              {/* Nama template */}
+              <div>
+                <label className="block text-sm font-semibold text-blue-700 mb-1">Nama Template</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={infoForm.name}
+                  onChange={handleInfoChange}
+                  className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-gray-900 font-medium placeholder-gray-400"
+                  placeholder="Masukkan nama template"
+                  required
+                />
+              </div>
+              {/* Harga template & Diskon */}
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-blue-700 mb-1">Harga</label>
+                  <input
+                    type="text"
+                    name="price"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    value={priceDisplay}
+                    onChange={handleInfoChange}
+                    className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-gray-900 font-medium placeholder-gray-400"
+                    placeholder="0"
+                    required
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-blue-700 mb-1">Diskon (%)</label>
+                  <input
+                    type="number"
+                    name="discount"
+                    value={infoForm.discount}
+                    onChange={handleInfoChange}
+                    className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-gray-900 font-medium placeholder-gray-400"
+                    placeholder="0"
+                    min="0"
+                    max="100"
+                  />
+                </div>
+              </div>
+              {/* Kategori template - custom dropdown */}
+              <div className="relative" ref={categoryRef}>
+                <label className="block text-sm font-semibold text-blue-700 mb-1">Kategori</label>
+                <button
+                  type="button"
+                  className={`w-full px-3 py-2 border-2 border-blue-200 rounded-lg bg-white text-gray-900 font-medium flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-purple-400 transition ${showCategory ? 'ring-2 ring-purple-400' : ''}`}
+                  onClick={() => setShowCategory((v) => !v)}
+                  tabIndex={0}
+                  aria-haspopup="listbox"
+                  aria-expanded={showCategory}
+                  required
+                >
+                  <span>{categories.find(c => c.value === infoForm.category)?.label || 'Pilih kategori'}</span>
+                  <svg className={`w-4 h-4 ml-2 transition-transform ${showCategory ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </button>
+                {showCategory && (
+                  <ul className="absolute left-0 right-0 mt-2 bg-white border-2 border-blue-200 rounded-lg shadow-lg z-50 animate-fadeIn overflow-hidden">
+                    {categories.map((cat) => (
+                      <li
+                        key={cat.value}
+                        className={`px-4 py-2 cursor-pointer hover:bg-purple-100 text-gray-900 ${infoForm.category === cat.value ? 'bg-purple-50 font-bold text-purple-700' : ''}`}
+                        onClick={() => {
+                          setInfoForm((prev) => ({ ...prev, category: cat.value }));
+                          setShowCategory(false);
+                        }}
+                        tabIndex={0}
+                        role="option"
+                        aria-selected={infoForm.category === cat.value}
+                      >
+                        {cat.label}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <Button type="submit" className="bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 w-full mt-2 py-2 rounded-lg shadow-lg transition-all text-base tracking-wide">Simpan Info</Button>
+            </form>
+          </div>
+        </div>
+      )}

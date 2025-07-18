@@ -15,6 +15,9 @@ import StepParents from '@/components/orderform/StepParents';
 import StepGift from '@/components/orderform/StepGift';
 import StepReview from '@/components/orderform/StepReview';
 
+// Tambah: import Firestore untuk fetch templates
+import { useEffect } from 'react';
+
 const steps = [
   { id: 1, title: 'Data Mempelai', icon: <Heart className="h-6 w-6" /> },
   { id: 2, title: 'Data Orang Tua', icon: <Users className="h-6 w-6" /> },
@@ -31,11 +34,28 @@ const OrderForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({});
   const [selectedMusicId, setSelectedMusicId] = useState(null);
+  // Pastikan templateId dari URL selalu masuk ke formData
+  useEffect(() => {
+    if (templateId) {
+      setFormData(prev => ({ ...prev, templateId: templateId.toString() }));
+    }
+  }, [templateId]);
+
+  // Pastikan selectedMusicId selalu masuk ke formData
+  useEffect(() => {
+    if (selectedMusicId) {
+      setFormData(prev => ({ ...prev, selectedMusicId: selectedMusicId.toString() }));
+    }
+  }, [selectedMusicId]);
   const [musicList, setMusicList] = useState([]);
   const [playingId, setPlayingId] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const audioRefs = React.useRef({});
+  // Tambah state untuk templates
+  const [templates, setTemplates] = useState([]);
+
+  // Fetch music list
   React.useEffect(() => {
     let unsub;
     (async () => {
@@ -52,9 +72,36 @@ const OrderForm = () => {
             title: d.name,
             category: d.category,
             url: d.url,
+            artist: d.artist || '',
           });
         });
         setMusicList(arr);
+      });
+    })();
+    return () => unsub && unsub();
+  }, []);
+
+  // Fetch templates dari Firestore
+  useEffect(() => {
+    let unsub;
+    (async () => {
+      const { getApp } = await import('firebase/app');
+      const { getFirestore, collection, onSnapshot } = await import('firebase/firestore');
+      const db = getFirestore(getApp());
+      const q = collection(db, 'templates');
+      unsub = onSnapshot(q, (snap) => {
+        const arr = [];
+        snap.forEach(doc => {
+          const d = doc.data();
+          if (d.status === 'publish') {
+            arr.push({
+              id: doc.id,
+              name: d.name,
+              ...d
+            });
+          }
+        });
+        setTemplates(arr);
       });
     })();
     return () => unsub && unsub();
@@ -190,7 +237,7 @@ const OrderForm = () => {
                     <StepGift toast={toast} formData={formData} setFormData={setFormData} handleChange={handleChange} />
                   )}
                   {currentStep === 6 && (
-                    <StepReview formData={formData} />
+                    <StepReview formData={formData} templates={templates} musicList={musicList} />
                   )}
                 </motion.div>
               </AnimatePresence>
