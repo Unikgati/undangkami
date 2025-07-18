@@ -14,8 +14,7 @@ const StepMusic = ({
 }) => {
   const audioRef = useRef(null);
   const [audioLoading, setAudioLoading] = useState(false);
-  // Track if user requested play but audio not yet ready
-  const [pendingPlay, setPendingPlay] = useState(false);
+  const [pendingPlay, setPendingPlay] = useState(false); // Track if user requested play but audio not yet ready
   return (
     <div className="space-y-6">
       {/* Category Filter - Custom Dropdown */}
@@ -66,8 +65,13 @@ const StepMusic = ({
                     audioRef.current.currentTime = 0;
                     audioRef.current.src = music.url;
                     setAudioLoading(true);
-                    setPendingPlay(true); // Mark that user wants to play
-                    audioRef.current.load();
+                    const playPromise = audioRef.current.play();
+                    if (playPromise && playPromise.catch) {
+                      playPromise.catch(() => {
+                        // Jika gagal, set pendingPlay true, play ulang di canplay/canplaythrough
+                        setPendingPlay(true);
+                      });
+                    }
                   }
                 }}
               >
@@ -94,8 +98,12 @@ const StepMusic = ({
                           audioRef.current.currentTime = 0;
                           audioRef.current.src = music.url;
                           setAudioLoading(true);
-                          setPendingPlay(true); // Mark that user wants to play
-                          audioRef.current.load();
+                          const playPromise = audioRef.current.play();
+                          if (playPromise && playPromise.catch) {
+                            playPromise.catch(() => {
+                              setPendingPlay(true);
+                            });
+                          }
                         }
                       }
                     }}
@@ -120,26 +128,6 @@ const StepMusic = ({
             ref={audioRef}
             src={playingId ? filteredMusicList.find(m => m.id === playingId)?.url : ''}
             onEnded={() => setPlayingId(null)}
-            onCanPlay={() => {
-              setAudioLoading(false);
-              if (pendingPlay && audioRef.current) {
-                const playPromise = audioRef.current.play();
-                if (playPromise && playPromise.catch) {
-                  playPromise.catch(e => console.log('Audio play error:', e));
-                }
-                setPendingPlay(false);
-              }
-            }}
-            onCanPlayThrough={() => {
-              setAudioLoading(false);
-              if (pendingPlay && audioRef.current) {
-                const playPromise = audioRef.current.play();
-                if (playPromise && playPromise.catch) {
-                  playPromise.catch(e => console.log('Audio play error:', e));
-                }
-                setPendingPlay(false);
-              }
-            }}
             onPlay={() => {
               setAudioLoading(false);
               setPendingPlay(false);
@@ -147,6 +135,24 @@ const StepMusic = ({
             onError={() => {
               setAudioLoading(false);
               setPendingPlay(false);
+            }}
+            onCanPlay={() => {
+              if (pendingPlay && audioRef.current) {
+                const playPromise = audioRef.current.play();
+                if (playPromise && playPromise.catch) {
+                  playPromise.catch(() => {});
+                }
+                setPendingPlay(false);
+              }
+            }}
+            onCanPlayThrough={() => {
+              if (pendingPlay && audioRef.current) {
+                const playPromise = audioRef.current.play();
+                if (playPromise && playPromise.catch) {
+                  playPromise.catch(() => {});
+                }
+                setPendingPlay(false);
+              }
             }}
             style={{ width: 0, height: 0, visibility: 'hidden' }}
           />
