@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState } from 'react';
 
 const StepMusic = ({
   selectedCategory,
@@ -14,7 +14,7 @@ const StepMusic = ({
 }) => {
   const audioRef = useRef(null);
   const [audioLoading, setAudioLoading] = useState(false);
-  const [pendingPlay, setPendingPlay] = useState(false); // Track if user requested play but audio not yet ready
+  // Tidak perlu pendingPlay, kontrol dari event dan readyState
   return (
     <div className="space-y-6">
       {/* Category Filter - Custom Dropdown */}
@@ -59,18 +59,30 @@ const StepMusic = ({
                 onClick={e => {
                   if (e.target.closest('button')) return;
                   setSelectedMusicId(music.id);
-                  setPlayingId(music.id);
                   if (audioRef.current) {
                     audioRef.current.pause();
                     audioRef.current.currentTime = 0;
                     audioRef.current.src = music.url;
                     setAudioLoading(true);
-                    const playPromise = audioRef.current.play();
-                    if (playPromise && playPromise.catch) {
-                      playPromise.catch(() => {
-                        // Jika gagal, set pendingPlay true, play ulang di canplay/canplaythrough
-                        setPendingPlay(true);
-                      });
+                    // Langsung play jika audio siap
+                    const tryPlay = () => {
+                      if (audioRef.current.readyState >= 2) {
+                        const playPromise = audioRef.current.play();
+                        if (playPromise && playPromise.catch) playPromise.catch(() => {});
+                        setPlayingId(music.id);
+                        setAudioLoading(false);
+                        return true;
+                      }
+                      return false;
+                    };
+                    if (!tryPlay()) {
+                      // Audio belum siap, tunggu loadedmetadata lalu play
+                      const onLoaded = () => {
+                        audioRef.current.removeEventListener('loadedmetadata', onLoaded);
+                        tryPlay();
+                      };
+                      audioRef.current.addEventListener('loadedmetadata', onLoaded);
+                      audioRef.current.load();
                     }
                   }
                 }}
@@ -89,20 +101,35 @@ const StepMusic = ({
                         }
                         setPlayingId(null);
                         setAudioLoading(false);
-                        setPendingPlay(false);
                       } else {
-                        setPlayingId(music.id);
-                        setSelectedMusicId(music.id);
+                        // Hanya play jika audio sudah siap
                         if (audioRef.current) {
-                          audioRef.current.pause();
-                          audioRef.current.currentTime = 0;
-                          audioRef.current.src = music.url;
-                          setAudioLoading(true);
-                          const playPromise = audioRef.current.play();
-                          if (playPromise && playPromise.catch) {
-                            playPromise.catch(() => {
-                              setPendingPlay(true);
-                            });
+                          if (audioRef.current.src !== music.url) {
+                            // Jika user klik play sebelum memilih lagu, set src dulu
+                            audioRef.current.src = music.url;
+                            setSelectedMusicId(music.id);
+                          }
+                          if (audioRef.current.readyState >= 2) {
+                            const playPromise = audioRef.current.play();
+                            if (playPromise && playPromise.catch) {
+                              playPromise.catch(() => {});
+                            }
+                            setPlayingId(music.id);
+                            setAudioLoading(false);
+                          } else {
+                            // Audio belum siap, tunggu loadedmetadata
+                            setAudioLoading(true);
+                            const onLoaded = () => {
+                              audioRef.current.removeEventListener('loadedmetadata', onLoaded);
+                              const playPromise = audioRef.current.play();
+                              if (playPromise && playPromise.catch) {
+                                playPromise.catch(() => {});
+                              }
+                              setPlayingId(music.id);
+                              setAudioLoading(false);
+                            };
+                            audioRef.current.addEventListener('loadedmetadata', onLoaded);
+                            audioRef.current.load();
                           }
                         }
                       }
@@ -126,34 +153,10 @@ const StepMusic = ({
           </ul>
           <audio
             ref={audioRef}
-            src={playingId ? filteredMusicList.find(m => m.id === playingId)?.url : ''}
+            src={selectedMusicId ? filteredMusicList.find(m => m.id === selectedMusicId)?.url : ''}
             onEnded={() => setPlayingId(null)}
-            onPlay={() => {
-              setAudioLoading(false);
-              setPendingPlay(false);
-            }}
-            onError={() => {
-              setAudioLoading(false);
-              setPendingPlay(false);
-            }}
-            onCanPlay={() => {
-              if (pendingPlay && audioRef.current) {
-                const playPromise = audioRef.current.play();
-                if (playPromise && playPromise.catch) {
-                  playPromise.catch(() => {});
-                }
-                setPendingPlay(false);
-              }
-            }}
-            onCanPlayThrough={() => {
-              if (pendingPlay && audioRef.current) {
-                const playPromise = audioRef.current.play();
-                if (playPromise && playPromise.catch) {
-                  playPromise.catch(() => {});
-                }
-                setPendingPlay(false);
-              }
-            }}
+            onLoadedMetadata={() => setAudioLoading(false)}
+            onError={() => setAudioLoading(false)}
             style={{ width: 0, height: 0, visibility: 'hidden' }}
           />
         </div>
