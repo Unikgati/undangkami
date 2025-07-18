@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 
 const StepMusic = ({
   selectedCategory,
@@ -14,6 +14,8 @@ const StepMusic = ({
 }) => {
   const audioRef = useRef(null);
   const [audioLoading, setAudioLoading] = useState(false);
+  // Track if user requested play but audio not yet ready
+  const [pendingPlay, setPendingPlay] = useState(false);
   return (
     <div className="space-y-6">
       {/* Category Filter - Custom Dropdown */}
@@ -58,18 +60,15 @@ const StepMusic = ({
                 onClick={e => {
                   if (e.target.closest('button')) return;
                   setSelectedMusicId(music.id);
+                  setPlayingId(music.id);
                   if (audioRef.current) {
                     audioRef.current.pause();
                     audioRef.current.currentTime = 0;
                     audioRef.current.src = music.url;
                     setAudioLoading(true);
+                    setPendingPlay(true); // Mark that user wants to play
                     audioRef.current.load();
-                    audioRef.current.oncanplay = () => {
-                      setAudioLoading(false);
-                      audioRef.current.play().catch(e => console.log('Audio play error:', e));
-                    };
                   }
-                  setPlayingId(music.id);
                 }}
               >
                 <div className="flex items-center gap-3 w-full">
@@ -86,20 +85,18 @@ const StepMusic = ({
                         }
                         setPlayingId(null);
                         setAudioLoading(false);
+                        setPendingPlay(false);
                       } else {
+                        setPlayingId(music.id);
+                        setSelectedMusicId(music.id);
                         if (audioRef.current) {
                           audioRef.current.pause();
                           audioRef.current.currentTime = 0;
                           audioRef.current.src = music.url;
                           setAudioLoading(true);
+                          setPendingPlay(true); // Mark that user wants to play
                           audioRef.current.load();
-                          audioRef.current.oncanplay = () => {
-                            setAudioLoading(false);
-                            audioRef.current.play().catch(e => console.log('Audio play error:', e));
-                          };
                         }
-                        setPlayingId(music.id);
-                        setSelectedMusicId(music.id);
                       }
                     }}
                   >
@@ -123,8 +120,21 @@ const StepMusic = ({
             ref={audioRef}
             src={playingId ? filteredMusicList.find(m => m.id === playingId)?.url : ''}
             onEnded={() => setPlayingId(null)}
-            onCanPlayThrough={() => setAudioLoading(false)}
-            onError={() => setAudioLoading(false)}
+            onCanPlayThrough={useCallback(() => {
+              setAudioLoading(false);
+              if (pendingPlay && audioRef.current) {
+                // Only play if user requested
+                const playPromise = audioRef.current.play();
+                if (playPromise && playPromise.catch) {
+                  playPromise.catch(e => console.log('Audio play error:', e));
+                }
+                setPendingPlay(false);
+              }
+            }, [pendingPlay])}
+            onError={() => {
+              setAudioLoading(false);
+              setPendingPlay(false);
+            }}
             style={{ width: 0, height: 0, visibility: 'hidden' }}
           />
         </div>
