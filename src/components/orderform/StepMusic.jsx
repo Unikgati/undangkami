@@ -120,17 +120,30 @@ const StepMusic = ({
             ref={audioRef}
             src={playingId ? filteredMusicList.find(m => m.id === playingId)?.url : ''}
             onEnded={() => setPlayingId(null)}
-            onCanPlayThrough={useCallback(() => {
+            onCanPlay={() => {
               setAudioLoading(false);
               if (pendingPlay && audioRef.current) {
-                // Only play if user requested
                 const playPromise = audioRef.current.play();
                 if (playPromise && playPromise.catch) {
                   playPromise.catch(e => console.log('Audio play error:', e));
                 }
                 setPendingPlay(false);
               }
-            }, [pendingPlay])}
+            }}
+            onCanPlayThrough={() => {
+              setAudioLoading(false);
+              if (pendingPlay && audioRef.current) {
+                const playPromise = audioRef.current.play();
+                if (playPromise && playPromise.catch) {
+                  playPromise.catch(e => console.log('Audio play error:', e));
+                }
+                setPendingPlay(false);
+              }
+            }}
+            onPlay={() => {
+              setAudioLoading(false);
+              setPendingPlay(false);
+            }}
             onError={() => {
               setAudioLoading(false);
               setPendingPlay(false);
