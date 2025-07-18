@@ -8,6 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowLeft, ArrowRight, PartyPopper, Heart, Users, MapPin, Music, Gift } from 'lucide-react';
+import StepMusic from '@/components/orderform/StepMusic';
+import StepSchedule from '@/components/orderform/StepSchedule';
+import StepBrideGroom from '@/components/orderform/StepBrideGroom';
+import StepParents from '@/components/orderform/StepParents';
+import StepGift from '@/components/orderform/StepGift';
+import StepReview from '@/components/orderform/StepReview';
 
 const steps = [
   { id: 1, title: 'Data Mempelai', icon: <Heart className="h-6 w-6" /> },
@@ -145,248 +151,46 @@ const OrderForm = () => {
                   transition={{ duration: 0.25, ease: 'easeInOut' }}
                 >
                   {currentStep === 1 && (
-                    <div className="space-y-4">
-                      <h3 className="text-xl font-semibold font-plusjakartasans mb-4">Mempelai Pria</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><Label htmlFor="groomFullName">Nama Lengkap</Label><Input id="groomFullName" name="groomFullName" onChange={handleChange} placeholder="Contoh: John Doe" className="bg-white/10" /></div>
-                        <div><Label htmlFor="groomNickName">Nama Panggilan</Label><Input id="groomNickName" name="groomNickName" onChange={handleChange} placeholder="Contoh: John" className="bg-white/10" /></div>
-                      </div>
-                      <h3 className="text-xl font-semibold font-plusjakartasans mt-6 mb-4">Mempelai Wanita</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><Label htmlFor="brideFullName">Nama Lengkap</Label><Input id="brideFullName" name="brideFullName" onChange={handleChange} placeholder="Contoh: Jane Doe" className="bg-white/10" /></div>
-                        <div><Label htmlFor="brideNickName">Nama Panggilan</Label><Input id="brideNickName" name="brideNickName" onChange={handleChange} placeholder="Contoh: Jane" className="bg-white/10" /></div>
-                      </div>
-                    </div>
+                    <StepBrideGroom formData={formData} setFormData={setFormData} handleChange={handleChange} />
                   )}
                   {currentStep === 2 && (
-                    <div className="space-y-4">
-                      <h3 className="text-xl font-semibold font-plusjakartasans mb-4">Orang Tua Mempelai Pria</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><Label htmlFor="groomFather">Nama Ayah</Label><Input id="groomFather" name="groomFather" onChange={handleChange} placeholder="Nama Ayah" className="bg-white/10" /></div>
-                        <div><Label htmlFor="groomMother">Nama Ibu</Label><Input id="groomMother" name="groomMother" onChange={handleChange} placeholder="Nama Ibu" className="bg-white/10" /></div>
-                      </div>
-                      <h3 className="text-xl font-semibold font-plusjakartasans mt-6 mb-4">Orang Tua Mempelai Wanita</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><Label htmlFor="brideFather">Nama Ayah</Label><Input id="brideFather" name="brideFather" onChange={handleChange} placeholder="Nama Ayah" className="bg-white/10" /></div>
-                        <div><Label htmlFor="brideMother">Nama Ibu</Label><Input id="brideMother" name="brideMother" onChange={handleChange} placeholder="Nama Ibu" className="bg-white/10" /></div>
-                      </div>
-                    </div>
+                    <StepParents formData={formData} setFormData={setFormData} handleChange={handleChange} />
                   )}
                   {currentStep === 3 && (
-                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold font-plusjakartasans mb-4">Akad Nikah</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div><Label htmlFor="akadDate">Tanggal</Label><Input id="akadDate" name="akadDate" type="date" onChange={handleChange} className="bg-white/10" /></div>
-                          <div>
-                            <Label htmlFor="akadTime">Waktu</Label>
-                            <div className="flex gap-2">
-                              <Input id="akadTime" name="akadTime" type="time" onChange={handleChange} className="bg-white/10" />
-                              <div className="relative w-full">
-                                <button
-                                  type="button"
-                                  className="flex h-10 w-full items-center justify-between rounded-md border border-input px-3 py-2 text-sm bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
-                                  onClick={() => setAkadTimezoneOpen((open) => !open)}
-                                >
-                                  {formData.akadTimezone || "Pilih Zona Waktu"}
-                                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                                </button>
-                                {akadTimezoneOpen && (
-                                  <ul className="absolute z-10 mt-1 w-full bg-gray-900 border border-white/20 rounded shadow-lg">
-                                    {akadTimezoneOptions.map((option) => (
-                                      <li
-                                        key={option}
-                                        className={`px-4 py-2 cursor-pointer hover:bg-purple-700 transition ${formData.akadTimezone === option ? "bg-purple-700 text-white" : "text-white"}`}
-                                        onClick={() => {
-                                          setFormData((prev) => ({ ...prev, akadTimezone: option }));
-                                          setAkadTimezoneOpen(false);
-                                        }}
-                                      >
-                                        {option}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div><Label htmlFor="akadLocation">Lokasi</Label><Input id="akadLocation" name="akadLocation" onChange={handleChange} placeholder="Nama Gedung/Jalan" className="bg-white/10" /></div>
-                        <div><Label htmlFor="akadMaps">Link Google Maps</Label><Input id="akadMaps" name="akadMaps" onChange={handleChange} placeholder="https://maps.app.goo.gl/..." className="bg-white/10" /></div>
-                        
-                        <h3 className="text-xl font-semibold font-plusjakartasans mt-6 mb-4">Resepsi</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div><Label htmlFor="resepsiDate">Tanggal</Label><Input id="resepsiDate" name="resepsiDate" type="date" onChange={handleChange} className="bg-white/10" /></div>
-                          <div>
-                            <Label htmlFor="resepsiTime">Waktu</Label>
-                            <div className="flex gap-2">
-                              <Input id="resepsiTime" name="resepsiTime" type="time" onChange={handleChange} className="bg-white/10" />
-                              <div className="relative w-full">
-                                <button
-                                  type="button"
-                                  className="flex h-10 w-full items-center justify-between rounded-md border border-input px-3 py-2 text-sm bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
-                                  onClick={() => setResepsiTimezoneOpen((open) => !open)}
-                                >
-                                  {formData.resepsiTimezone || "Pilih Zona Waktu"}
-                                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                                </button>
-                                {resepsiTimezoneOpen && (
-                                  <ul className="absolute z-10 mt-1 w-full bg-gray-900 border border-white/20 rounded shadow-lg">
-                                    {resepsiTimezoneOptions.map((option) => (
-                                      <li
-                                        key={option}
-                                        className={`px-4 py-2 cursor-pointer hover:bg-purple-700 transition ${formData.resepsiTimezone === option ? "bg-purple-700 text-white" : "text-white"}`}
-                                        onClick={() => {
-                                          setFormData((prev) => ({ ...prev, resepsiTimezone: option }));
-                                          setResepsiTimezoneOpen(false);
-                                        }}
-                                      >
-                                        {option}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div><Label htmlFor="resepsiLocation">Lokasi</Label><Input id="resepsiLocation" name="resepsiLocation" onChange={handleChange} placeholder="Nama Gedung/Jalan" className="bg-white/10" /></div>
-                        <div><Label htmlFor="resepsiMaps">Link Google Maps</Label><Input id="resepsiMaps" name="resepsiMaps" onChange={handleChange} placeholder="https://maps.app.goo.gl/..." className="bg-white/10" /></div>
-                    </div>
+                    <StepSchedule
+                      formData={formData}
+                      setFormData={setFormData}
+                      akadTimezoneOpen={akadTimezoneOpen}
+                      setAkadTimezoneOpen={setAkadTimezoneOpen}
+                      akadTimezoneOptions={akadTimezoneOptions}
+                      resepsiTimezoneOpen={resepsiTimezoneOpen}
+                      setResepsiTimezoneOpen={setResepsiTimezoneOpen}
+                      resepsiTimezoneOptions={resepsiTimezoneOptions}
+                      handleChange={handleChange}
+                    />
                   )}
                   {currentStep === 4 && (
-                    <div className="space-y-6">
-                      {/* Category Filter - Custom Dropdown */}
-                      <div className="mb-2 flex flex-wrap gap-2 items-center">
-                        <span className="text-sm text-white">Filter kategori:</span>
-                        <div className="relative w-48">
-                          <button
-                            type="button"
-                            className="flex h-10 w-full items-center justify-between rounded-md border border-purple-400 px-3 py-2 text-sm bg-purple-900/40 text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
-                            onClick={() => setCategoryDropdownOpen((open) => !open)}
-                          >
-                            {selectedCategory}
-                            <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                          </button>
-                          {categoryDropdownOpen && (
-                            <ul className="absolute z-10 mt-1 w-full bg-gray-900 border border-white/20 rounded shadow-lg max-h-56 overflow-y-auto">
-                              {categoryOptions.map((cat) => (
-                                <li
-                                  key={cat}
-                                  className={`px-4 py-2 cursor-pointer hover:bg-purple-700 transition ${selectedCategory === cat ? "bg-purple-700 text-white" : "text-white"}`}
-                                  onClick={() => {
-                                    setSelectedCategory(cat);
-                                    setCategoryDropdownOpen(false);
-                                  }}
-                                >
-                                  {cat}
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                      </div>
-                      {filteredMusicList.length === 0 ? (
-                        <p className="text-gray-300 text-center">Belum ada musik yang tersedia.</p>
-                      ) : (
-                        <div className="rounded-lg bg-white/5 p-2" style={{ maxHeight: '230px', overflowY: 'auto' }}>
-                          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            {filteredMusicList.map((music) => (
-                              <li
-                                key={music.id}
-                                className={`flex flex-row items-center justify-between py-3 px-2 rounded-lg h-full cursor-pointer ${selectedMusicId === music.id ? 'bg-purple-900/40 border-2 border-purple-400 shadow-lg' : ''}`}
-                                onClick={e => {
-                                  // Prevent double trigger if play button is clicked
-                                  if (e.target.closest('button')) return;
-                                  setSelectedMusicId(music.id);
-                                  // Auto play the selected music
-                                  // Stop all others and reset their time
-                                  Object.values(audioRefs.current).forEach(a => {
-                                    if (a) {
-                                      a.pause();
-                                      a.currentTime = 0;
-                                    }
-                                  });
-                                  const audio = audioRefs.current[music.id];
-                                  if (audio) {
-                                    audio.currentTime = 0;
-                                    audio.play();
-                                  }
-                                  setPlayingId(music.id);
-                                }}
-                              >
-                                <div className="flex items-center gap-3 w-full">
-                                  <button
-                                    type="button"
-                                    className={`rounded-full p-2 bg-purple-700 hover:bg-purple-800 transition focus:outline-none focus:ring-2 focus:ring-purple-400 ${selectedMusicId === music.id ? 'ring-2 ring-purple-400' : ''}`}
-                                    aria-label={playingId === music.id ? 'Stop' : 'Play'}
-                                    onClick={ev => {
-                                      ev.stopPropagation();
-                                      if (playingId === music.id) {
-                                        // Stop: pause and reset to start
-                                        const audio = audioRefs.current[music.id];
-                                        if (audio) {
-                                          audio.pause();
-                                          audio.currentTime = 0;
-                                        }
-                                        setPlayingId(null);
-                                        // Optionally deselect music on stop
-                                        // setSelectedMusicId(null);
-                                      } else {
-                                        // Stop all others and reset their time
-                                        Object.values(audioRefs.current).forEach(a => {
-                                          if (a) {
-                                            a.pause();
-                                            a.currentTime = 0;
-                                          }
-                                        });
-                                        // Play from start
-                                        const audio = audioRefs.current[music.id];
-                                        if (audio) {
-                                          audio.currentTime = 0;
-                                          audio.play();
-                                        }
-                                        setPlayingId(music.id);
-                                        setSelectedMusicId(music.id);
-                                      }
-                                    }}
-                                  >
-                                    {playingId === music.id ? (
-                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" /></svg>
-                                    ) : (
-                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><polygon points="6,4 20,12 6,20" fill="currentColor" /></svg>
-                                    )}
-                                  </button>
-                                  <div className="flex flex-col">
-                                    <span className="font-plusjakartasans text-white text-base font-semibold">{music.title}</span>
-                                    <span className="text-xs text-purple-300 mt-1">{music.category ? music.category.charAt(0).toUpperCase() + music.category.slice(1) : ''}</span>
-                                  </div>
-                                </div>
-                                <audio
-                                  ref={el => audioRefs.current[music.id] = el}
-                                  src={music.url}
-                                  onEnded={() => setPlayingId(null)}
-                                  style={{ display: 'none' }}
-                                />
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
+                    <StepMusic
+                      selectedCategory={selectedCategory}
+                      setSelectedCategory={setSelectedCategory}
+                      categoryDropdownOpen={categoryDropdownOpen}
+                      setCategoryDropdownOpen={setCategoryDropdownOpen}
+                      categoryOptions={categoryOptions}
+                      filteredMusicList={filteredMusicList}
+                      selectedMusicId={selectedMusicId}
+                      setSelectedMusicId={setSelectedMusicId}
+                      playingId={playingId}
+                      setPlayingId={setPlayingId}
+                      audioRefs={audioRefs}
+                      formData={formData}
+                      setFormData={setFormData}
+                    />
                   )}
                   {currentStep === 5 && (
-                    <div className="text-center">
-                        <h3 className="text-xl font-semibold font-plusjakartasans mb-4">Informasi Hadiah Pernikahan</h3>
-                        <p className="text-gray-300">Anda dapat menambahkan beberapa rekening bank atau e-wallet.</p>
-                        <Button type="button" variant="secondary" className="mt-4" onClick={() => toast({ title: "🚧 Fitur Belum Tersedia" })}>+ Tambah Rekening</Button>
-                    </div>
+                    <StepGift toast={toast} formData={formData} setFormData={setFormData} handleChange={handleChange} />
                   )}
                   {currentStep === 6 && (
-                    <div className="text-center">
-                      <h3 className="text-xl font-semibold font-plusjakartasans mb-4">Satu Langkah Lagi!</h3>
-                      <p className="text-gray-300 mb-6">Periksa kembali data Anda di halaman preview sebelum melanjutkan ke pembayaran.</p>
-                      <Button type="submit" size="lg" className="pulse-glow">Lihat Preview Undangan</Button>
-                    </div>
+                    <StepReview formData={formData} />
                   )}
                 </motion.div>
               </AnimatePresence>
