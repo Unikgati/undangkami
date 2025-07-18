@@ -50,7 +50,7 @@ const PreviewPage = () => {
   return (
     <div className="w-full h-screen min-h-screen bg-black p-0 m-0 relative">
       {loading ? (
-        <div className="flex flex-col items-center justify-center h-[60vh]">
+        <div className="flex flex-col items-center justify-center min-h-screen h-screen w-full">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mb-4"></div>
           <div className="text-lg text-gray-200">Memuat preview template...</div>
         </div>

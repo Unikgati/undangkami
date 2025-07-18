@@ -359,36 +359,34 @@ useEffect(() => {
 				</section>
 
 				{/* Main Content */}
-				<main className="flex-1 p-8">
-					<div
-						id="templates"
-						className="masonry-grid"
-						style={{ columnGap: '1rem' }}
-					>
-						<style>{`
-							.masonry-grid { column-count: 2; }
-							@media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
-							@media (min-width: 1280px) { .masonry-grid { column-count: 4; } }
-							.masonry-item { break-inside: avoid; margin-bottom: 1rem; }
-						`}</style>
-						{loadingTemplates ? (
-			<div className="masonry-item flex items-center justify-center" style={{ minHeight: '220px' }}>
-			  <div className="flex flex-col items-center justify-center">
-				<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-400 mb-4"></div>
-				<div className="text-gray-300 text-lg">Memuat template...</div>
-			  </div>
-			</div>
-						) : templates.length === 0 ? (
-							<div className="text-center text-gray-400 py-10 text-lg masonry-item">Belum ada template yang tersedia.</div>
-						) : (
-							templates.map((template, index) => (
-								<div key={template.id} className="masonry-item">
-									<TemplateCard template={template} />
-								</div>
-							))
-						)}
-					</div>
-				</main>
+<main className="flex-1 p-8">
+  <section id="templates" style={{ position: 'relative', width: '100%' }}>
+	{loadingTemplates && (
+	  <div className="flex flex-col items-center justify-center w-full" style={{ minHeight: '220px', padding: '48px 0' }}>
+		<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-400 mb-4"></div>
+		<div className="text-gray-300 text-lg">Memuat template...</div>
+	  </div>
+	)}
+	<style>{`
+	  .masonry-grid { column-count: 2; }
+	  @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
+	  @media (min-width: 1280px) { .masonry-grid { column-count: 4; } }
+	  .masonry-item { break-inside: avoid; margin-bottom: 1rem; }
+	`}</style>
+	{!loadingTemplates && templates.length === 0 && (
+	  <div className="text-center text-gray-400 py-10 text-lg masonry-item">Belum ada template yang tersedia.</div>
+	)}
+	{!loadingTemplates && templates.length > 0 && (
+	  <div className="masonry-grid" style={{ columnGap: '1rem' }}>
+		{templates.map((template, index) => (
+		  <div key={template.id} className="masonry-item">
+			<TemplateCard template={template} />
+		  </div>
+		))}
+	  </div>
+	)}
+  </section>
+</main>
 
 				{/* Footer */}
 				<footer className="w-full bg-white/30 backdrop-blur-md text-center py-8 mt-12 border-t border-white/20 rounded-t-3xl">
