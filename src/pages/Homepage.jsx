@@ -31,62 +31,60 @@ const templates = [
 ];
 
 const TemplateCard = ({ template }) => {
-	const handlePreview = (e) => {
-		e.preventDefault();
-		// Logika preview atau toast
-	};
+  const price = Number(template.price) || 0;
+  const discount = Number(template.discount) || 0;
+  const finalPrice = price * (1 - discount / 100);
+  // Pastikan id selalu string
+  const templateId = String(template.id);
 
-	const price = Number(template.price) || 0;
-	const discount = Number(template.discount) || 0;
-	const finalPrice = price * (1 - discount / 100);
-
-	return (
+  return (
 	<motion.div whileHover={{ y: -10, scale: 1.03 }} transition={{ type: 'spring', stiffness: 300 }}>
-		<Card className="overflow-hidden border border-purple-200 bg-white text-gray-800 rounded-xl shadow-md sm:rounded-2xl sm:shadow-lg">
-			<div className="relative w-full aspect-square bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center">
-				<img
-					alt={template.name}
-					className="w-full h-full object-cover"
-					src={template.thumbnail || "https://images.unsplash.com/photo-1595872018818-97555653a011"}
-					style={{ aspectRatio: '1/1', display: 'block' }}
-				/>
-				<span className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs bg-purple-100 text-purple-700 font-semibold border border-purple-200">
-					{template.category || 'Islamic'}
-				</span>
-			</div>
-			<CardContent className="p-3 sm:p-4 md:p-6">
-				<h3 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-4">{template.name}</h3>
-				<div className="mb-2 sm:mb-4 flex flex-wrap items-center">
-					{price > 0 ? (
-						<>
-							<span className="text-gray-400 line-through mr-2 text-xs sm:text-sm">Rp{price.toLocaleString('id-ID')}</span>
-							<span className="text-purple-700 font-bold text-sm sm:text-lg">Rp{finalPrice.toLocaleString('id-ID')}</span>
-							{discount > 0 && (
-								<span className="ml-2 text-xs text-green-600 font-semibold">-{discount}%</span>
-							)}
-						</>
-					) : (
-						<span className="text-green-600 font-bold text-sm sm:text-lg">Gratis</span>
-					)}
-				</div>
-				<div className="flex flex-col sm:flex-row justify-between gap-2 mt-2">
-					<Button
-						variant="outline"
-						className="w-full sm:flex-1 py-2 text-xs sm:text-sm bg-white border border-purple-700 text-purple-700 hover:bg-purple-700 hover:text-white hover:border-purple-800"
-						onClick={handlePreview}
-					>
-						Preview
-					</Button>
-					<Link to={`/order/${template.id}`} className="w-full sm:flex-1">
-						<Button className="w-full py-2 text-xs sm:text-sm bg-purple-700 text-white hover:bg-purple-800 hover:shadow-lg">
-							Cobain
-						</Button>
-					</Link>
-				</div>
-			</CardContent>
-		</Card>
+	  <Card className="overflow-hidden border border-purple-200 bg-white text-gray-800 rounded-xl shadow-md sm:rounded-2xl sm:shadow-lg">
+		<div className="relative w-full aspect-square bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center">
+		  <img
+			alt={template.name}
+			className="w-full h-full object-cover"
+			src={template.thumbnail || "https://images.unsplash.com/photo-1595872018818-97555653a011"}
+			style={{ aspectRatio: '1/1', display: 'block' }}
+		  />
+		  <span className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs bg-purple-100 text-purple-700 font-semibold border border-purple-200">
+			{template.category || 'Islamic'}
+		  </span>
+		</div>
+		<CardContent className="p-3 sm:p-4 md:p-6">
+		  <h3 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-4">{template.name}</h3>
+		  <div className="mb-2 sm:mb-4 flex flex-wrap items-center">
+			{price > 0 ? (
+			  <>
+				<span className="text-gray-400 line-through mr-2 text-xs sm:text-sm">Rp{price.toLocaleString('id-ID')}</span>
+				<span className="text-purple-700 font-bold text-sm sm:text-lg">Rp{finalPrice.toLocaleString('id-ID')}</span>
+				{discount > 0 && (
+				  <span className="ml-2 text-xs text-green-600 font-semibold">-{discount}%</span>
+				)}
+			  </>
+			) : (
+			  <span className="text-green-600 font-bold text-sm sm:text-lg">Gratis</span>
+			)}
+		  </div>
+		  <div className="flex flex-col sm:flex-row justify-between gap-2 mt-2">
+			<Link to={`/preview/${templateId}`} className="w-full sm:flex-1">
+			  <Button
+				variant="outline"
+				className="w-full py-2 text-xs sm:text-sm bg-white border border-purple-700 text-purple-700 hover:bg-purple-700 hover:text-white hover:border-purple-800"
+			  >
+				Preview
+			  </Button>
+			</Link>
+			<Link to={`/order/${templateId}`} className="w-full sm:flex-1">
+			  <Button className="w-full py-2 text-xs sm:text-sm bg-purple-700 text-white hover:bg-purple-800 hover:shadow-lg">
+				Cobain
+			  </Button>
+			</Link>
+		  </div>
+		</CardContent>
+	  </Card>
 	</motion.div>
-	);
+  );
 };
 
 const Homepage = () => {

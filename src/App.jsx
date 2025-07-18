@@ -8,6 +8,7 @@ import Payment from '@/pages/Payment';
 import Login from '@/pages/Login';
 import AdminDashboard from '@/pages/AdminDashboard';
 import UserDashboard from '@/pages/UserDashboard';
+import PreviewPage from '@/pages/PreviewPage'; // Pastikan file ini ada
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/order/:templateId" element={<OrderForm />} />
+          {/* Penting: letakkan preview template di atas preview order */}
+          <Route path="/preview/:templateId" element={<PreviewPage />} />
           <Route path="/preview/:orderId" element={<PreviewInvitation />} />
           <Route path="/payment/:orderId" element={<Payment />} />
           <Route path="/login" element={<Login />} />
