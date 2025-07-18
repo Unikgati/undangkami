@@ -61,19 +61,38 @@ const PreviewPage = () => {
         </div>
       ) : (
         <>
-          {/* Tombol kembali dan cobain, absolute di atas undangan */}
-          <div className="absolute top-4 left-4 z-50">
+          {/* Tombol sticky bawah di mobile, tetap di atas di desktop */}
+          {/* Desktop (md+): tetap di atas */}
+          <div className="hidden md:block">
+            <div className="absolute top-4 left-4 z-50">
+              <Button
+                variant="outline"
+                className="bg-white/80 border border-purple-700 text-purple-700 hover:bg-purple-700 hover:text-white hover:border-purple-800 shadow-md px-5 py-2 text-sm font-semibold rounded-full"
+                onClick={() => navigate(-1)}
+              >
+                ← Kembali
+              </Button>
+            </div>
+            <div className="absolute top-4 right-4 z-50">
+              <Button
+                className="bg-purple-700 text-white hover:bg-purple-800 hover:shadow-lg px-5 py-2 text-sm font-semibold rounded-full"
+                onClick={() => navigate(`/order/${templateId}`)}
+              >
+                Cobain Gratis
+              </Button>
+            </div>
+          </div>
+          {/* Mobile: sticky bottom */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 w-full flex md:hidden bg-black/80 backdrop-blur-sm border-t border-purple-700 px-4 py-3 gap-3 justify-center">
             <Button
               variant="outline"
-              className="bg-white/80 border border-purple-700 text-purple-700 hover:bg-purple-700 hover:text-white hover:border-purple-800 shadow-md px-5 py-2 text-sm font-semibold rounded-full"
+              className="flex-1 bg-white/80 border border-purple-700 text-purple-700 hover:bg-purple-700 hover:text-white hover:border-purple-800 shadow-md px-5 py-3 text-base font-semibold rounded-full"
               onClick={() => navigate(-1)}
             >
               ← Kembali
             </Button>
-          </div>
-          <div className="absolute top-4 right-4 z-50">
             <Button
-              className="bg-purple-700 text-white hover:bg-purple-800 hover:shadow-lg px-5 py-2 text-sm font-semibold rounded-full"
+              className="flex-1 bg-purple-700 text-white hover:bg-purple-800 hover:shadow-lg px-5 py-3 text-base font-semibold rounded-full"
               onClick={() => navigate(`/order/${templateId}`)}
             >
               Cobain Gratis
