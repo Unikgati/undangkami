@@ -4,6 +4,8 @@ import dummyInvitationData from './dummyInvitationData';
 import { toISODate } from '../lib/utils';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { app } from '../lib/firebase';
 
 const PreviewPage = () => {
   const { templateId } = useParams();
@@ -53,6 +55,31 @@ const PreviewPage = () => {
     return html.replace(/{{(.*?)}}/g, (_, key) => data[key.trim()] || '');
   }
 
+  const [templateHtml, setTemplateHtml] = useState("");
+  const [invitationData, setInvitationData] = useState(dummyInvitationData);
+  const [musicUrl, setMusicUrl] = useState("");
+
+  // Firestore lookup for music URL
+  useEffect(() => {
+    async function fetchMusicUrl() {
+      const db = getFirestore(app);
+      const musicId = invitationData.selectedMusicId;
+      if (!musicId) return;
+      try {
+        const docRef = doc(db, "music", musicId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setMusicUrl(docSnap.data().url || "");
+        } else {
+          setMusicUrl("");
+        }
+      } catch (e) {
+        setMusicUrl("");
+      }
+    }
+    fetchMusicUrl();
+  }, [invitationData.selectedMusicId]);
+
   let srcDoc = '';
   if (template) {
     // Support both flat and nested (code) structure
@@ -60,14 +87,14 @@ const PreviewPage = () => {
     const css = template.css || (template.code && template.code.css) || '';
     const js = template.js || (template.code && template.code.js) || '';
     // Siapkan data dummy + ISO otomatis jika belum ada
-    const data = { ...dummyInvitationData };
+    const data = { ...dummyInvitationData, musicUrl };
     if (!data.tanggalAkadISO && data.tanggalAkad && data.jamAkad && data.zonaWaktuAkad) {
       data.tanggalAkadISO = toISODate(data.tanggalAkad, data.jamAkad, data.zonaWaktuAkad);
     }
     if (!data.tanggalResepsiISO && data.tanggalResepsi && data.jamResepsi && data.zonaWaktuResepsi) {
       data.tanggalResepsiISO = toISODate(data.tanggalResepsi, data.jamResepsi, data.zonaWaktuResepsi);
     }
-    // Isi placeholder dengan data dummy/real
+    // Inject musicUrl (URL) ke data agar placeholder {{musicUrl}} diisi URL, bukan ID
     const filledHtml = fillTemplatePlaceholders(html, data);
     srcDoc = `<style>${css}</style>\n${filledHtml}\n<script>${js}<\/script>`;
   }
@@ -113,6 +140,7 @@ const PreviewPage = () => {
             <Button
               variant="outline"
               className="flex-1 bg-white/80 border border-purple-700 text-purple-700 hover:bg-purple-700 hover:text-white hover:border-purple-800 shadow-md px-5 py-3 text-base font-semibold rounded-full"
+  // Replace placeholders in template with data
               onClick={() => navigate(-1)}
             >
               ← Kembali
