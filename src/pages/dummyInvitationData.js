@@ -9,13 +9,13 @@ const dummyInvitationData = {
     {
       holder: 'Ayodya Chandra',
       name: 'GoPay',
-      account: '0890679230',
+      account: '089679608282',
       type: 'ewallet'
     },
     {
       name: 'SMBC',
       holder: 'Ayodya Chandra',
-      account: '12396767',
+      account: '90310316625',
       type: 'bank'
     }
   ],
