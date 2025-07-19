@@ -230,7 +230,7 @@ const PreviewPage = () => {
           <div
             style={{
               position: 'fixed',
-              bottom: 16,
+              bottom: typeof window !== 'undefined' && window.innerWidth < 768 ? 100 : 16,
               right: 16,
               zIndex: 100,
               background: 'rgba(255,255,255,0.92)',
@@ -243,6 +243,7 @@ const PreviewPage = () => {
               border: '1px solid #b76e79',
               minHeight: 32,
               minWidth: 32,
+              transition: 'bottom 0.2s',
             }}
           >
             <button
