@@ -81,7 +81,8 @@ const PreviewPage = () => {
   }, [invitationData.selectedMusicId]);
 
   const iframeRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showMusicModal, setShowMusicModal] = useState(false);
   let srcDoc = '';
   if (template) {
     // Support both flat and nested (code) structure
@@ -97,10 +98,18 @@ const PreviewPage = () => {
       data.tanggalResepsiISO = toISODate(data.tanggalResepsi, data.jamResepsi, data.zonaWaktuResepsi);
     }
     // Inject script to listen for play/pause commands from parent
+    // Pastikan audio TIDAK autoplay di template HTML!
     const controlScript = `\n<script>\nwindow.addEventListener('message', function(e) {\n  if (!window.document.getElementById('wedding-music')) return;\n  if (e.data === 'play-audio') {\n    window.document.getElementById('wedding-music').play();\n  } else if (e.data === 'pause-audio') {\n    window.document.getElementById('wedding-music').pause();\n  }\n});\n<\/script>`;
     const filledHtml = fillTemplatePlaceholders(html, data);
     srcDoc = `<style>${css}</style>\n${filledHtml}\n<script>${js}<\/script>${controlScript}`;
   }
+
+  // Show modal on mount (after loading & error check)
+  useEffect(() => {
+    if (!loading && !error && template) {
+      setShowMusicModal(true);
+    }
+  }, [loading, error, template]);
 
   const navigate = useNavigate();
   return (
@@ -164,11 +173,64 @@ const PreviewPage = () => {
             style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 10 }}
             sandbox="allow-scripts allow-same-origin"
           />
+          {/* Modal Konfirmasi Musik */}
+          {showMusicModal && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'rgba(0,0,0,0.45)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <div style={{
+                background: 'white',
+                borderRadius: 16,
+                padding: '2rem 1.5rem',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+                maxWidth: 320,
+                textAlign: 'center',
+              }}>
+                <div style={{ fontWeight: 700, fontSize: 18, color: '#b76e79', marginBottom: 12 }}>Putar Musik?</div>
+                <div style={{ color: '#444', fontSize: 15, marginBottom: 24 }}>Apakah Anda ingin memutar musik undangan saat preview?</div>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                  <button
+                    style={{
+                      background: '#b76e79', color: 'white', border: 'none', borderRadius: 8, padding: '0.5rem 1.2rem', fontWeight: 600, fontSize: 15, cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      setShowMusicModal(false);
+                      setIsPlaying(true);
+                      setTimeout(() => {
+                        if (iframeRef.current) {
+                          iframeRef.current.contentWindow.postMessage('play-audio', '*');
+                        }
+                      }, 200);
+                    }}
+                  >Putar</button>
+                  <button
+                    style={{
+                      background: '#eee', color: '#b76e79', border: 'none', borderRadius: 8, padding: '0.5rem 1.2rem', fontWeight: 600, fontSize: 15, cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      setShowMusicModal(false);
+                      setIsPlaying(false);
+                    }}
+                  >Jangan</button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Sticky Audio Controller */}
           <div
             style={{
               position: 'fixed',
-              bottom: window.innerWidth < 768 ? 100 : 16,
+              bottom: 16,
               right: 16,
               zIndex: 100,
               background: 'rgba(255,255,255,0.92)',
@@ -181,7 +243,6 @@ const PreviewPage = () => {
               border: '1px solid #b76e79',
               minHeight: 32,
               minWidth: 32,
-              transition: 'bottom 0.2s',
             }}
           >
             <button
