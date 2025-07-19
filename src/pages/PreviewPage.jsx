@@ -1,5 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
+import dummyInvitationData from './dummyInvitationData';
+import { toISODate } from '../lib/utils';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -37,13 +39,28 @@ const PreviewPage = () => {
     return () => { ignore = true; };
   }, [templateId]);
 
+  // Fungsi replace placeholder {{key}} dengan data
+  function fillTemplatePlaceholders(html, data) {
+    return html.replace(/{{(.*?)}}/g, (_, key) => data[key.trim()] || '');
+  }
+
   let srcDoc = '';
   if (template) {
     // Support both flat and nested (code) structure
     const html = template.html || (template.code && template.code.html) || '';
     const css = template.css || (template.code && template.code.css) || '';
     const js = template.js || (template.code && template.code.js) || '';
-    srcDoc = `<style>${css}</style>\n${html}\n<script>${js}<\/script>`;
+    // Siapkan data dummy + ISO otomatis jika belum ada
+    const data = { ...dummyInvitationData };
+    if (!data.tanggalAkadISO && data.tanggalAkad && data.jamAkad && data.zonaWaktuAkad) {
+      data.tanggalAkadISO = toISODate(data.tanggalAkad, data.jamAkad, data.zonaWaktuAkad);
+    }
+    if (!data.tanggalResepsiISO && data.tanggalResepsi && data.jamResepsi && data.zonaWaktuResepsi) {
+      data.tanggalResepsiISO = toISODate(data.tanggalResepsi, data.jamResepsi, data.zonaWaktuResepsi);
+    }
+    // Isi placeholder dengan data dummy/real
+    const filledHtml = fillTemplatePlaceholders(html, data);
+    srcDoc = `<style>${css}</style>\n${filledHtml}\n<script>${js}<\/script>`;
   }
 
   const navigate = useNavigate();

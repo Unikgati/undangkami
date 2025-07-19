@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { db } from '@/lib/firebase';
+import { addDoc, collection } from 'firebase/firestore';
 
 // Sekarang menerima prop templates (array daftar template) dan musicList
 const StepReview = ({ formData, templates = [], musicList = [] }) => {
-  // Debug: cek isi data
-  console.log('StepReview formData:', formData);
-  console.log('StepReview templates:', templates);
-  console.log('StepReview musicList:', musicList);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
+
   // Cari nama template berdasarkan id
   const selectedTemplate = templates.find(
     t => t.id?.toString() === (formData?.templateId?.toString() || formData?.template?.toString())
@@ -15,6 +17,28 @@ const StepReview = ({ formData, templates = [], musicList = [] }) => {
   const selectedMusic = musicList.find(
     m => m.id?.toString() === formData?.selectedMusicId?.toString()
   );
+
+  // Handler submit yang sederhana dan efektif
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    setLoading(true);
+    setSuccess(false);
+    setError(null);
+    try {
+      await addDoc(collection(db, 'orders'), {
+        ...formData,
+        createdAt: new Date().toISOString(),
+        status: 'pending',
+      });
+      setSuccess(true);
+    } catch (err) {
+      setError('Gagal menyimpan data. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-xl mx-auto space-y-6">
 
@@ -95,8 +119,17 @@ const StepReview = ({ formData, templates = [], musicList = [] }) => {
         )}
       </div>
 
-      <div className="text-center">
-        <Button type="submit" size="lg" className="pulse-glow">Lihat Preview Undangan</Button>
+      <div className="text-center space-y-2">
+        <Button
+          type="button"
+          disabled={loading}
+          onClick={handleSubmit}
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 bg-white text-black hover:bg-gray-200 w-full"
+        >
+          {loading ? 'Menyimpan...' : 'Submit'}
+        </Button>
+        {success && <div className="text-green-500 font-semibold">Data berhasil disimpan!</div>}
+        {error && <div className="text-red-400 font-semibold">{error}</div>}
       </div>
     </div>
   );
