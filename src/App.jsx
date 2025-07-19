@@ -9,6 +9,7 @@ import Login from '@/pages/Login';
 import AdminDashboard from '@/pages/AdminDashboard';
 import UserDashboard from '@/pages/UserDashboard';
 import PreviewPage from '@/pages/PreviewPage'; // Pastikan file ini ada
+import InvitationView from '@/pages/InvitationView';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/user" element={<UserDashboard />} />
+          <Route path="/inv/:slug" element={<InvitationView />} />
         </Routes>
         <Toaster />
       </div>
