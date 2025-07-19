@@ -41,6 +41,15 @@ const PreviewPage = () => {
 
   // Fungsi replace placeholder {{key}} dengan data
   function fillTemplatePlaceholders(html, data) {
+    // Handle blok each untuk weddingGifts
+    html = html.replace(/{{#each weddingGifts}}([\s\S]*?){{\/each}}/g, (_, inner) => {
+      if (!Array.isArray(data.weddingGifts)) return '';
+      return data.weddingGifts.map(gift => {
+        // Ganti {{key}} dalam inner dengan value dari gift
+        return inner.replace(/{{(.*?)}}/g, (_, key) => gift[key.trim()] || '');
+      }).join('');
+    });
+    // Handle placeholder biasa
     return html.replace(/{{(.*?)}}/g, (_, key) => data[key.trim()] || '');
   }
 
