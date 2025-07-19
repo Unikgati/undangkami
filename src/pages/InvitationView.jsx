@@ -111,7 +111,7 @@ const InvitationView = () => {
       <div
         style={{
           position: 'fixed',
-          bottom: typeof window !== 'undefined' && window.innerWidth < 768 ? 100 : 16,
+          bottom: typeof window !== 'undefined' && window.innerWidth < 768 ? 16 : 16,
           right: 16,
           zIndex: 100,
           background: 'rgba(255,255,255,0.92)',
