@@ -363,27 +363,20 @@ const ManageOrders = () => {
       if (nomorWa && order.slug) {
         const linkUndangan = window.location.origin + '/inv/' + order.slug;
         const linkTamu = window.location.origin + '/tamu?id=' + order.slug;
-        const pesan1 = `Alhamdulillah, undangan antum telah berhasil diaktifkan! Silakan cek melalui link berikut:\n ${linkUndangan}\n\nUntuk menambahkan nama tamu secara custom/personal, gunakan link berikut:\n Link Input Nama Tamu: ${linkTamu}\n\nTerima kasih atas kepercayaannya menggunakan layanan kami. Semoga acaranya berjalan lancar dan penuh keberkahan.`;
-        const pesan2 = `📘 Tutorial Input Nama Tamu:\n\n1. Klik link Input Nama Tamu\n2. Masukkan nama tamu sesuai keinginan\n3. Klik tombol Buat Link Undangan\n4. Setelah link dibuat, klik Bagikan untuk menyebarkan undangan`;
-        // Kirim pesan pertama
+        const pesan = `Alhamdulillah, undangan antum telah berhasil diaktifkan! ✨\n\n🔗 Link Undangan:\n${linkUndangan}\n\n📝 Untuk membuat link undangan dengan nama tamu:\n${linkTamu}\n\n📘 Cara membuat link undangan dengan nama tamu:\n1. Klik link Input Nama Tamu di atas\n2. Masukkan nama tamu sesuai keinginan\n3. Klik tombol Buat Link Undangan\n4. Setelah link dibuat, klik Bagikan untuk menyebarkan undangan\n\nTerima kasih atas kepercayaannya menggunakan layanan kami. Semoga acaranya berjalan lancar dan penuh keberkahan. 🤲`;
+
+        // Kirim pesan
         const res1 = await fetch(`${API_URL}/send-whatsapp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ number: nomorWa, message: pesan1 })
+          body: JSON.stringify({ number: nomorWa, message: pesan })
         });
         const data1 = await res1.json();
-        // Kirim pesan kedua
-        const res2 = await fetch(`${API_URL}/send-whatsapp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ number: nomorWa, message: pesan2 })
-        });
-        const data2 = await res2.json();
-        if (data1.success && data2.success) {
+        if (data1.success) {
           setProcessSuccess(true);
           setShowProcessModal(true);
         } else {
-          setProcessError(data1.error || data2.error || 'Unknown error');
+          setProcessError(data1.error || 'Unknown error');
           setShowProcessModal(true);
         }
       } else {
