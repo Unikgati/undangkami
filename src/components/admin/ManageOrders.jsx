@@ -363,7 +363,7 @@ const ManageOrders = () => {
       if (nomorWa && order.slug) {
         const linkUndangan = window.location.origin + '/inv/' + order.slug;
         const linkTamu = window.location.origin + '/tamu?id=' + order.slug;
-        const pesan1 = `Undangan antum telah berhasil diaktifkan! Silakan cek melalui link berikut:\n🔗 ${linkUndangan}\n\nUntuk menambahkan nama tamu secara custom/personal, gunakan link berikut:\n🔗 Link Input Nama Tamu: ${linkTamu}\n\nTerima kasih atas kepercayaannya menggunakan layanan kami. Semoga acaranya berjalan lancar dan penuh keberkahan.`;
+        const pesan1 = `Alhamdulillah, undangan antum telah berhasil diaktifkan! Silakan cek melalui link berikut:\n🔗 ${linkUndangan}\n\nUntuk menambahkan nama tamu secara custom/personal, gunakan link berikut:\n🔗 Link Input Nama Tamu: ${linkTamu}\n\nTerima kasih atas kepercayaannya menggunakan layanan kami. Semoga acaranya berjalan lancar dan penuh keberkahan.`;
         const pesan2 = `📘 Tutorial Input Nama Tamu:\n\n1. Klik link Input Nama Tamu\n2. Masukkan nama tamu sesuai keinginan\n3. Klik tombol Buat Link Undangan\n4. Setelah link dibuat, klik Bagikan untuk menyebarkan undangan`;
         // Kirim pesan pertama
         const res1 = await fetch(`${API_URL}/send-whatsapp`, {
