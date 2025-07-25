@@ -37,7 +37,7 @@ const dummyInvitationData = {
   groomMother: 'Fatihatun Wahidah',
   akadTime: '09:00',
   brideFather: 'Sofyan Hadi',
-  groomNickName: 'Anamf'
+  groomNickName: 'Anam'
 };
 
 export default dummyInvitationData;
