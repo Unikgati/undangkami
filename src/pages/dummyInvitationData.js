@@ -7,14 +7,14 @@ const dummyInvitationData = {
   groomFather: 'Munawir, S.Pd',
   weddingGifts: [
     {
-      holder: 'Ayodya Chandra',
+      holder: 'Syariful Anam',
       name: 'GoPay',
       account: '089679608282',
       type: 'ewallet'
     },
     {
       name: 'SMBC',
-      holder: 'Ayodya Chandra',
+      holder: 'Syariful Anam',
       account: '90310316625',
       type: 'bank'
     }
@@ -24,9 +24,9 @@ const dummyInvitationData = {
   akadDate: '2025-07-29',
   resepsiTime: '11:00',
   status: 'pending',
-  groomFullName: 'Abdilialloh Ayodya Chandra',
+  groomFullName: 'Syariful Anam',
   selectedMusicId: '58764OPsFOWCx2H6GYKO',
-  brideFullName: 'Ahadiatul Siska Andini',
+  brideFullName: 'Siti Aisyah',
   resepsiDate: '2025-07-29',
   createdAt: '2025-07-18T22:40:54.284Z',
   akadLocation: 'Masjid Mahalluttaqwa Dusun Tandek',
@@ -37,7 +37,7 @@ const dummyInvitationData = {
   groomMother: 'Fatihatun Wahidah',
   akadTime: '09:00',
   brideFather: 'Sofyan Hadi',
-  groomNickName: 'Yodi'
+  groomNickName: 'Anamf'
 };
 
 export default dummyInvitationData;
