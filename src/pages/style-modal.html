@@ -1,0 +1,39 @@
+Modal Wrapper
+<div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+
+Modal Box
+<div className="bg-gradient-to-br from-blue-50 via-white to-purple-100 border-2 border-blue-200 shadow-2xl rounded-2xl p-0 min-w-[340px] max-w-[95vw] w-full md:w-[420px] animate-fadeIn">
+
+Header Modal
+<h2 className="text-xl font-bold text-blue-800 tracking-tight">Info Template</h2>
+
+Tombol Tutup Modal
+<button className="rounded-full p-1.5 transition bg-gray-100 hover:bg-purple-100 border border-transparent hover:border-purple-400 text-gray-400 hover:text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400">
+
+Input Upload Gambar
+<input className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-300" />
+
+Preview Gambar Thumbnail
+<img className="w-16 h-16 object-cover rounded-lg border-2 border-purple-200 shadow" />
+
+Tombol Hapus Thumbnail
+<button className="absolute -top-2 -right-2 bg-white border border-purple-200 rounded-full p-1 shadow hover:bg-red-100">
+
+Input Nama Template
+<input className="w-full px-3 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-gray-900 font-medium placeholder-gray-400" />
+
+Input Harga dan Diskon
+Struktur dan gaya sama dengan input nama, tapi dipisah 2 kolom menggunakan:
+<div className="flex gap-3">...</div>
+
+Dropdown Kategori (Custom)
+<button className="... flex items-center justify-between">
+
+Kustom dropdown dengan animasi dan pilihan:
+<ul className="absolute left-0 right-0 mt-2 bg-white border-2 border-blue-200 rounded-lg shadow-lg z-50 animate-fadeIn">
+
+Setiap li akan berubah gaya jika dipilih:
+className="px-4 py-2 cursor-pointer hover:bg-purple-100 text-gray-900 bg-purple-50 font-bold text-purple-700"
+
+Tombol Simpan
+<Button className="bg-gradient-to-r from-purple-700 to-blue-700 text-white font-bold hover:from-purple-800 hover:to-blue-800 w-full mt-2 py-2 rounded-lg shadow-lg transition-all text-base tracking-wide">

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Undangan</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    /* style.css */
+        body {
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(to bottom, #fdfcfb, #e2d1c3);
+        color: #333;
+        overflow-x: hidden;
+        perspective: 1000px;
+        }
+
+        .hidden {
+        display: none;
+        }
+
+        /* Cover Section */
+        #cover {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(135deg, #fff0f5, #ffe4e1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transform-style: preserve-3d;
+        z-index: 10;
+        transform-origin: left center;
+        transition: transform 1.2s ease-out, opacity 1s ease-out;
+        }
+
+        #cover.opening {
+        transform: rotateY(-90deg);
+        opacity: 0;
+        pointer-events: none;
+        }
+
+        .cover-content {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        backdrop-filter: blur(8px);
+        width: 90%;
+        max-width: 600px;
+        }
+
+        .cover-names {
+        font-family: 'Great Vibes', cursive;
+        font-size: 2.5rem;
+        color: #b76e79;
+        margin-bottom: 1rem;
+        }
+
+        /* RSVP Button */
+        .rsvp-btn {
+        background-color: #b76e79;
+        color: white;
+        padding: 0.7em 1.5em;
+        border: none;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, background 0.3s;
+        }
+
+        .rsvp-btn:hover {
+        transform: scale(1.05);
+        background: #a85c66;
+        }
+
+        /* Section */
+        section {
+        padding: 4em 1em;
+        text-align: center;
+        animation: fadeUp 1s ease-out both;
+        background-color: rgba(255,255,255,0.5);
+        margin: 2em auto;
+        max-width: 800px;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        backdrop-filter: blur(6px);
+        }
+
+        /* Animasi */
+        @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        }
+
+        /* Countdown */
+        .countdown {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 1em;
+        margin: 1em 0;
+        }
+
+        .time-box {
+        background: #fff;
+        border-radius: 10px;
+        padding: 1em;
+        min-width: 60px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
+        }
+
+        .time-box:hover {
+        transform: scale(1.05);
+        }
+
+        .time-box span {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #b76e79;
+        font-family: monospace;
+        }
+
+        /* Footer */
+        footer {
+        text-align: center;
+        padding: 2em;
+        font-size: 0.9rem;
+        color: #666;
+        }
+
+        /* Wedding Gift Container */
+        .gift-box {
+        padding: 1em;
+        background: rgba(255, 255, 255, 0.4);
+        border-radius: 12px;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        }
+
+        .gift-box:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Gift List */
+        .gift-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1rem;
+        }
+
+        .gift-card {
+        background: linear-gradient(135deg, #E0D2C7, #fdfbfb);
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        box-shadow: 0 4px 10px rgba(106, 17, 203, 0.1);
+        text-align: left;
+        transition: transform 0.2s ease;
+        }
+
+        .gift-card:hover {
+        transform: scale(1.02);
+        }
+
+        .gift-bank {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #5a2a83;
+        margin-bottom: 0.25rem;
+        }
+
+        .gift-type {
+        font-size: 0.9rem;
+        color: #888;
+        }
+
+        .gift-account {
+        font-size: 1.25rem;
+        font-family: 'Share Tech Mono', monospace;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+        color: #1a1a1a;
+        }
+
+        .gift-holder {
+        font-size: 0.9rem;
+        color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+        .cover-names {
+            font-size: 2rem;
+        }
+
+        .rsvp-btn {
+            padding: 0.6em 1.2em;
+            font-size: 0.95rem;
+        }
+
+        section {
+            padding: 3em 1em;
+        }
+
+        .time-box span {
+            font-size: 1.2rem;
+        }
+        }
+
+  </style>
+</head>
+<body>
+
+  <!-- Cover Section -->
+  <div id="cover">
+    <div class="cover-content">
+      <h1 class="cover-names">{{groomNickName}} & {{brideNickName}}</h1>
+      <p>Kepada Yth:</p>
+      <h2 id="guestName">Tamu Undangan</h2>
+      <button id="openInvitation" class="rsvp-btn">Buka Undangan</button>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <div id="content" class="hidden">
+
+    <!-- Section 1: Ayat Suci -->
+    <section class="animate">
+      <h2>Ayat Suci Al-Qur'an</h2>
+      <p>"Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan-pasangan dari jenismu sendiri..." (QS. Ar-Rum: 21)</p>
+    </section>
+
+    <!-- Section 2: Profil Mempelai -->
+    <section class="animate" id="profilMempelai">
+      <h2>Profil Mempelai</h2>
+      <p><strong>{{groomFullName}}</strong><br>
+        Anak dari Bapak <span>{{groomFather}}</span> dan Ibu <span>{{groomMother}}</span>
+      </p>
+      <p><strong>{{brideFullName}}</strong><br>
+        Anak dari Bapak <span>{{brideFather}}</span> dan Ibu <span>{{brideMother}}</span>
+      </p>
+    </section>
+
+    <!-- Section 3: Save The Date -->
+    <section class="animate">
+      <h3>Akad Nikah</h3>
+      <p id="akad-info">{{akadDate}} {{akadTime}} di {{akadLocation}}</p>
+      <div class="countdown" id="countdown-akad">
+        <div class="time-box"><span id="days-akad">00</span><label>Hari</label></div>
+        <div class="time-box"><span id="hours-akad">00</span><label>Jam</label></div>
+        <div class="time-box"><span id="minutes-akad">00</span><label>Menit</label></div>
+        <div class="time-box"><span id="seconds-akad">00</span><label>Detik</label></div>
+      </div>
+      <button class="rsvp-btn" id="btn-akad-map" data-map="{{akadMaps}}">Lokasi Akad</button>
+
+      <h3>Resepsi</h3>
+      <p id="resepsi-info">{{resepsiDate}} {{resepsiTime}} di {{resepsiLocation}}</p>
+      <div class="countdown" id="countdown-resepsi">
+        <div class="time-box"><span id="days-resepsi">00</span><label>Hari</label></div>
+        <div class="time-box"><span id="hours-resepsi">00</span><label>Jam</label></div>
+        <div class="time-box"><span id="minutes-resepsi">00</span><label>Menit</label></div>
+        <div class="time-box"><span id="seconds-resepsi">00</span><label>Detik</label></div>
+      </div>
+      <button class="rsvp-btn" id="btn-resepsi-map" data-map="{{resepsiMaps}}">Lokasi Resepsi</button>
+    </section>
+
+    <!-- Section 4: Wedding Gift -->
+    <section class="gift">
+      <h3>Kado Digital</h3>
+        <div id="gift-container" class="gift-list">
+          {{#each weddingGifts}}
+            <div class="gift-card">
+              <div class="gift-bank">{{name}} <span class="gift-type">({{type}})</span></div>
+              <div class="gift-account">{{account}}</div>
+              <div class="gift-holder">a.n. <strong>{{holder}}</strong></div>
+            </div>
+          {{/each}}
+        </div>
+    </section>
+
+    <!-- Section 5: Ucapan Terima Kasih -->
+    <section class="animate">
+      <p>Terima kasih atas doa dan restu yang diberikan.</p>
+      <h1 class="cover-names">{{groomNickName}} & {{brideNickName}}</h1>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      &copy; 2025 Undangan Digital - Dibuat dengan cinta 💕
+    </footer>
+  </div>
+  <script>
+            // script.js
+
+        document.getElementById("openInvitation").addEventListener("click", function () {
+        const cover = document.getElementById("cover");
+        cover.classList.add("opening");
+
+        setTimeout(() => {
+            cover.style.display = "none";
+            document.getElementById("content").classList.remove("hidden");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 1200);
+        });
+
+        // COUNTDOWN FUNCTION
+        function updateCountdown(idPrefix, eventDateStr) {
+        const now = new Date().getTime();
+        const eventDate = new Date(eventDateStr).getTime();
+        const distance = eventDate - now;
+
+        if (distance < 0) {
+            document.getElementById(`countdown-${idPrefix}`).innerHTML = "<h2>Acara Telah Berlangsung</h2>";
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById(`days-${idPrefix}`).textContent = String(days).padStart(2, '0');
+        document.getElementById(`hours-${idPrefix}`).textContent = String(hours).padStart(2, '0');
+        document.getElementById(`minutes-${idPrefix}`).textContent = String(minutes).padStart(2, '0');
+        document.getElementById(`seconds-${idPrefix}`).textContent = String(seconds).padStart(2, '0');
+        }
+
+        // Ambil datetime dari elemen info (misal: "2025-07-27 09:00 di Masjid")
+        function getDateTimeFromInfo(infoId) {
+        const text = document.getElementById(infoId)?.textContent || '';
+        const match = text.match(/^([0-9\-]+)\s+([0-9:]+)/);
+        if (!match) return null;
+        return `${match[1]}T${match[2]}:00`;
+        }
+
+        // Jalankan countdown tiap detik berdasarkan elemen info
+        setInterval(() => {
+        const akadDateStr = getDateTimeFromInfo('akad-info');
+        const resepsiDateStr = getDateTimeFromInfo('resepsi-info');
+        if (akadDateStr) updateCountdown("akad", akadDateStr);
+        if (resepsiDateStr) updateCountdown("resepsi", resepsiDateStr);
+        }, 1000);
+
+        // Tombol Lokasi
+        ["btn-akad-map", "btn-resepsi-map"].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.addEventListener("click", () => {
+            const mapUrl = btn.getAttribute("data-map");
+            if (mapUrl) window.open(mapUrl, "_blank");
+            });
+        }
+        });
+  </script>
+</body>
+</html>
+
+
