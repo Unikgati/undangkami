@@ -62,11 +62,16 @@ const TemplateBuilder = () => {
                 thumbnailCloudinaryId: data.thumbnailCloudinaryId || '',
               }));
               if (data.code) {
-                setCode({
+                const templateCode = {
                   html: data.code.html || '',
                   css: data.code.css || '',
                   js: data.code.js || '',
-                });
+                };
+                setCode(templateCode);
+                // Update initialCode saat template dimuat
+                initialCode.html = templateCode.html;
+                initialCode.css = templateCode.css;
+                initialCode.js = templateCode.js;
               }
             }
           } catch (err) {
@@ -255,8 +260,22 @@ const TemplateBuilder = () => {
 
   // Fungsi cek perubahan (dirty)
   const isDirty = () => {
-    // Bandingkan dengan initialCode
-    return code.html !== initialCode.html || code.css !== initialCode.css || code.js !== initialCode.js;
+    // Jika sedang mengedit template yang ada (ada templateId)
+    if (location.state?.templateId) {
+      const savedCode = {
+        html: code.html || '',
+        css: code.css || '',
+        js: code.js || ''
+      };
+      const initialCodeFromState = {
+        html: initialCode.html || '',
+        css: initialCode.css || '',
+        js: initialCode.js || ''
+      };
+      return JSON.stringify(savedCode) !== JSON.stringify(initialCodeFromState);
+    }
+    // Jika membuat template baru, cek apakah ada konten yang diisi
+    return Boolean(code.html || code.css || code.js);
   };
 
   const handleClose = () => {
