@@ -94,10 +94,8 @@ const AdminLayout = ({ children }) => {
                     style={{ position: 'sticky', top: 0, height: '100vh', zIndex: 20 }}
                 >
                     <div className="flex items-center gap-3 mb-10">
-                        {logoUrl ? (
+                        {logoUrl && (
                             <img src={logoUrl} alt="Logo" className="max-h-12 max-w-32 object-contain" style={{ height: 'auto', width: 'auto', display: 'block' }} />
-                        ) : (
-                            <img src="/logo192.png" alt="Logo" className="h-10 w-10 rounded-full border border-purple-400" />
                         )}
                     </div>
                     <nav className="flex-grow">
@@ -152,10 +150,8 @@ const AdminLayout = ({ children }) => {
                 >
                     <div className="flex items-center justify-between mb-10">
                         <div className="flex items-center gap-3">
-                            {logoUrl ? (
+                            {logoUrl && (
                                 <img src={logoUrl} alt="Logo" className="max-h-12 max-w-32 object-contain" style={{ height: 'auto', width: 'auto', display: 'block' }} />
-                            ) : (
-                                <img src="/logo192.png" alt="Logo" className="h-10 w-10 rounded-full border border-purple-400" />
                             )}
                         </div>
                         <button
