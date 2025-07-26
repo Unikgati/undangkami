@@ -32,7 +32,7 @@ const dummyInvitationData = {
   akadLocation: 'Masjid Al-Hikmah, Jakarta Selatan',
   resepsiLocation: 'Gedung Serbaguna Cempaka Putih',
   resepsiTimezone: 'WIB',
-  templateId: 'TEMPLATE123456',
+  templateId: 'zI60IZ2b9ZZswdnmFrRA',
   brideNickName: 'Lia',
   groomMother: 'Sulastri Handayani',
   akadTime: '10:00',
