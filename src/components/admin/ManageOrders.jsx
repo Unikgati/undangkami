@@ -359,7 +359,7 @@ const ManageOrders = () => {
       });
       // Kirim pesan WhatsApp via backend Baileys
       const nomorWa = normalizeWhatsappNumber(order.whatsappNumber);
-      const API_URL = 'https://api.undangceria.my';
+      const API_URL = 'https://api.undangceria.my.id';
       if (nomorWa && order.slug) {
         const linkUndangan = window.location.origin + '/inv/' + order.slug;
         const linkTamu = window.location.origin + '/tamu?id=' + order.slug;
