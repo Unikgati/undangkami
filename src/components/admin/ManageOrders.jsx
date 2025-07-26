@@ -359,7 +359,7 @@ const ManageOrders = () => {
       });
       // Kirim pesan WhatsApp via backend Baileys
       const nomorWa = normalizeWhatsappNumber(order.whatsappNumber);
-      const API_URL = 'https://api.undangceria.my.id';
+      const API_URL = 'https://api.undangceria.my';
       if (nomorWa && order.slug) {
         const linkUndangan = window.location.origin + '/inv/' + order.slug;
         const linkTamu = window.location.origin + '/tamu?id=' + order.slug;
@@ -387,8 +387,14 @@ const ManageOrders = () => {
       setProcessError(err.message);
       setShowProcessModal(true);
     }
+  };
+
+  // Reset processing state when modal is closed
+  const handleCloseProcessModal = () => {
+    setShowProcessModal(false);
     setProcessingOrderId(null);
   };
+
   const handleDelete = (order) => {
     setSelectedOrder(order);
     setShowDeleteModal(true);
@@ -596,7 +602,7 @@ const ManageOrders = () => {
       {showProcessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full relative" style={{ boxShadow: '0 8px 32px rgba(80,40,160,0.18)' }}>
-            <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" onClick={() => setShowProcessModal(false)}>
+            <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700" onClick={handleCloseProcessModal}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             {processSuccess ? (
@@ -604,22 +610,40 @@ const ManageOrders = () => {
                 <svg className="w-12 h-12 text-green-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeWidth="2" stroke="currentColor" fill="none"/><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M8 12l2 2 4-4"/></svg>
                 <h2 className="text-lg font-bold text-green-700">Pesan WhatsApp berhasil dikirim!</h2>
                 <p className="text-gray-700 text-center">Link undangan dan tutorial penggunaan telah dikirim ke pelanggan.</p>
-                <button className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" onClick={() => setShowProcessModal(false)}>Tutup</button>
+                <button className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" onClick={handleCloseProcessModal}>Tutup</button>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
                 <svg className="w-12 h-12 text-red-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeWidth="2" stroke="currentColor" fill="none"/><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M15 9l-6 6M9 9l6 6"/></svg>
                 <h2 className="text-lg font-bold text-red-700">Gagal mengirim WhatsApp</h2>
-                <p className="text-gray-700 text-center">{processError || 'Terjadi kesalahan saat mengirim pesan.'}</p>
-                <div className="mt-2 p-3 rounded bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
-                  <b>Solusi manual:</b><br />
-                  Silakan copy link undangan dan kirim manual ke WhatsApp pelanggan.<br />
-                  <span className="break-all">{(() => {
-                    const order = orders.find(o => o.id === processingOrderId);
-                    return order ? (window.location.origin + '/inv/' + order.slug) : '';
-                  })()}</span>
-                </div>
-                <button className="mt-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700" onClick={() => setShowProcessModal(false)}>Tutup</button>
+                <p className="text-gray-700 text-center mb-4">{processError || 'Terjadi kesalahan saat mengirim pesan.'}</p>
+                <div className="w-full border-t border-gray-200 my-4"></div>
+                <h3 className="text-md font-semibold text-gray-800 mb-4 text-center">Pilih opsi pengiriman manual:</h3>
+                {(() => {
+                  const order = orders.find(o => o.id === processingOrderId);
+                  if (order) {
+                    const linkUndangan = window.location.origin + '/inv/' + order.slug;
+                    const linkTamu = window.location.origin + '/tamu?id=' + order.slug;
+                    const pesan = `Alhamdulillah, undangan antum telah berhasil diaktifkan! ✨\n\n🔗 Link Undangan:\n${linkUndangan}\n\n📝 Untuk membuat link undangan dengan nama tamu:\n${linkTamu}\n\n📘 Cara membuat link undangan dengan nama tamu:\n1. Klik link Input Nama Tamu di atas\n2. Masukkan nama tamu sesuai keinginan\n3. Klik tombol Buat Link Undangan\n4. Setelah link dibuat, klik Bagikan untuk menyebarkan undangan\n\nTerima kasih atas kepercayaannya menggunakan layanan kami. Semoga acaranya berjalan lancar dan penuh keberkahan. 🤲`;
+                    const waUrl = `https://wa.me/${normalizeWhatsappNumber(order.whatsappNumber)}?text=${encodeURIComponent(pesan)}`;
+                    return (
+                      <div className="flex flex-col gap-4 w-full">
+                        <button 
+                          className="w-full px-4 py-3 bg-[#25D366] text-white rounded-lg hover:bg-[#22bf5b] flex items-center justify-center gap-2 font-medium"
+                          onClick={() => window.open(waUrl, '_blank')}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm.029 18.88c-1.161 0-2.305-.292-3.318-.844l-3.677.964.984-3.595c-.607-1.052-.927-2.246-.926-3.468.001-3.825 3.113-6.937 6.937-6.937 1.856.001 3.598.723 4.907 2.034 1.31 1.311 2.031 3.054 2.03 4.908-.001 3.825-3.113 6.938-6.937 6.938z"/>
+                          </svg>
+                          Kirim melalui WhatsApp
+                        </button>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+                <div className="w-full border-t border-gray-200 my-4"></div>
+                <button className="mt-2 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700" onClick={handleCloseProcessModal}>Tutup</button>
               </div>
             )}
           </div>
